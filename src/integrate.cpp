@@ -364,7 +364,7 @@ This will use verbose output and calculate the integral for the domain:\n\
     
     currentWorkList += make_pair(side, make_pair(tol/(int)sides.size(), i));
   }
-  
+
   //For storing the result of the integral
   cinterval integral(0);
   cinterval tmpIntegral(0);
@@ -402,6 +402,12 @@ This will use verbose output and calculate the integral for the domain:\n\
       coefs[i] *= -1;
   }
 
+  //For storing the sides to integrate next iteration
+  List<pair<civector, pair<real, int> > > nextWorkList;
+
+  //For checking if all steps are done
+  bool done(false);
+  
   //Initiate the citaylor class
   citaylor tmp;
 
@@ -428,11 +434,11 @@ This will use verbose output and calculate the integral for the domain:\n\
     interval domainVolume;
     cinterval currentIntegral;
     //For checking the result
-    bool ok(true);
+    bool ok;
     //For storint the width of the integral
     real width;
-    //For cheking when done
-    bool done(false);
+    //For cheking when done with one step of the integration
+    bool stepDone(false);
     //For checking if the integration succeded and satisfies the
     //tolerance
     bool partDone(false);
@@ -441,52 +447,75 @@ This will use verbose output and calculate the integral for the domain:\n\
     {
       if (omp_get_thread_num() == 0 && verbose)
         cout << "Number of threads: " << omp_get_num_threads() << endl;
-      
-      if (!IsEmpty(currentWorkList)) {
-        currentPart = Pop(currentWorkList);
-      } else {
-        done = true;
-      }
     }
 
-    while(!done) {
-
-      ok = true;
-      
-      currentDomain = currentPart.first;
-      tol = currentPart.second.first;
-      side = currentPart.second.second;
-
-      integrandEnclosure = integrand(currentDomain, side, ok, parameter);
-      domainVolume = volume(currentDomain, side);
-
-      currentIntegral = integrandEnclosure*domainVolume*coefs[side];
-
-      width = diam(Re(currentIntegral));
-
-      partDone = width <= tol && ok;
-
-      if (!partDone) {
-        splitIntegrationPart(currentPart, newPart1, newPart2);
-      }
-      
+    while (!done) {
 #pragma omp critical
       {
-        ++steps;
-        if (!partDone) {
-          currentWorkList += newPart1;
-          currentWorkList += newPart2;
-        } else {
-          integral += currentIntegral;
-          sideIntegral[side] += currentIntegral;
-        }
-
         if (!IsEmpty(currentWorkList)) {
           currentPart = Pop(currentWorkList);
         } else {
-          done = true;
+          stepDone = true;
         }
       }
+      //Perform the step
+      while(!stepDone) {
+        
+        ok = true;
+      
+        currentDomain = currentPart.first;
+        tol = currentPart.second.first;
+        side = currentPart.second.second;
+
+        integrandEnclosure = integrand(currentDomain, side, ok, parameter);
+        domainVolume = volume(currentDomain, side);
+
+        currentIntegral = integrandEnclosure*domainVolume*coefs[side];
+
+        width = diam(Re(currentIntegral));
+
+        partDone = width <= tol && ok;
+
+        if (!partDone) {
+          splitIntegrationPart(currentPart, newPart1, newPart2);
+        }
+        
+#pragma omp critical
+        {
+          ++steps;
+          if (!partDone) {
+            nextWorkList += newPart1;
+            nextWorkList += newPart2;
+          } else {
+            integral += currentIntegral;
+            sideIntegral[side] += currentIntegral;
+          }
+
+          if (!IsEmpty(currentWorkList)) {
+            currentPart = Pop(currentWorkList);
+          } else {
+            stepDone = true;
+          }
+        }
+      }
+      //Hande going to the next step
+#pragma omp barrier
+#pragma omp single
+      {
+        //Set the next work list to the current one
+        if (!IsEmpty(nextWorkList)) {
+          currentWorkList = nextWorkList;
+          Clear(nextWorkList);
+          done = false;
+          //cout << "Continuing" << endl;
+        } else {
+          done = true;
+          //cout << "Done!" << endl;
+        }
+      }
+      //Reset variables
+      partDone = false;
+      stepDone = false;
     }
 
     if (verbose) {
