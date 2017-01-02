@@ -407,8 +407,14 @@ This will use verbose output and calculate the integral for the domain:\n\
   List<pair<civector, pair<real, int> > > * nextWorkList;
   nextWorkList = new List<pair<civector, pair<real, int> > >;
 
+  //For storing current step
+  int step = 0;
   //For checking if all steps are done
   bool done(false);
+  //For storing completed and left parts
+  int partsLeft = 0;
+  int partsDone = 0;
+  int partsFailed = 0;
   
   //Initiate the citaylor class
   citaylor tmp;
@@ -479,9 +485,17 @@ This will use verbose output and calculate the integral for the domain:\n\
           if (!partDone) {
             *nextWorkList += newPart1;
             *nextWorkList += newPart2;
+            partsLeft += 2;
           } else {
             integral += currentIntegral;
             sideIntegral[side] += currentIntegral;
+            partsDone += 1;
+          }
+
+          if (!ok) {
+            partsFailed += 1;
+          } else {
+            tmpIntegral += currentIntegral;
           }
 
           if (!IsEmpty(*currentWorkList)) {
@@ -495,6 +509,20 @@ This will use verbose output and calculate the integral for the domain:\n\
 #pragma omp barrier
 #pragma omp single
       {
+
+        if (verbose) {
+          cout << "Step " << step << endl;
+          cout << "Parts done: " << partsDone << ", parts left: " << partsLeft << endl;
+          cout << "Failed integrations: " << partsFailed << endl;
+          cout << "Current integral: " << tmpIntegral << endl;
+          cout << "Completed interal: " << integral << endl;
+        }
+        step += 1;
+        partsDone = 0;
+        partsLeft = 0;
+        partsFailed = 0;
+        tmpIntegral = integral;
+        
         //Set the next work list to the current one
         if (!IsEmpty(*nextWorkList)) {
           delete currentWorkList;
