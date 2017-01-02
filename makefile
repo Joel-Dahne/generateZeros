@@ -29,5 +29,8 @@ build/generateZeros: build/generateZeros.o build/citaylor.o build/function.o
 build/integrate: build/integrate.o build/citaylor.o build/function.o
 	g++ -o $@ -fopenmp $(CXSCINC) $(RPATH) $^ -lcxsc
 
-build/%.o: src/%.cpp
+build/%.o: src/%.cpp | build
 	g++ -fopenmp -o $@ $(CXSCINC) $(RPATH) -c $< -lcxsc
+
+build:
+	mkdir build
