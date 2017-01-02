@@ -338,7 +338,8 @@ This will use verbose output and calculate the integral for the domain:\n\
     }
   }
   
-  List<pair<civector, pair<real, int> > > currentWorkList;
+  List<pair<civector, pair<real, int> > > * currentWorkList;
+  currentWorkList = new List<pair<civector, pair<real, int> > >;
 
   for (int j = 0; j < sides.size(); ++j) {
     int i = sides[j];
@@ -362,7 +363,7 @@ This will use verbose output and calculate the integral for the domain:\n\
       Im(side[2]) = interval(SupIm(side[2]));
     }
     
-    currentWorkList += make_pair(side, make_pair(tol/(int)sides.size(), i));
+    *currentWorkList += make_pair(side, make_pair(tol/(int)sides.size(), i));
   }
 
   //For storing the result of the integral
@@ -403,7 +404,8 @@ This will use verbose output and calculate the integral for the domain:\n\
   }
 
   //For storing the sides to integrate next iteration
-  List<pair<civector, pair<real, int> > > nextWorkList;
+  List<pair<civector, pair<real, int> > > * nextWorkList;
+  nextWorkList = new List<pair<civector, pair<real, int> > >;
 
   //For checking if all steps are done
   bool done(false);
@@ -443,8 +445,8 @@ This will use verbose output and calculate the integral for the domain:\n\
     while (!done) {
 #pragma omp critical
       {
-        if (!IsEmpty(currentWorkList)) {
-          currentPart = Pop(currentWorkList);
+        if (!IsEmpty(*currentWorkList)) {
+          currentPart = Pop(*currentWorkList);
         } else {
           stepDone = true;
         }
@@ -475,15 +477,15 @@ This will use verbose output and calculate the integral for the domain:\n\
         {
           ++steps;
           if (!partDone) {
-            nextWorkList += newPart1;
-            nextWorkList += newPart2;
+            *nextWorkList += newPart1;
+            *nextWorkList += newPart2;
           } else {
             integral += currentIntegral;
             sideIntegral[side] += currentIntegral;
           }
 
-          if (!IsEmpty(currentWorkList)) {
-            currentPart = Pop(currentWorkList);
+          if (!IsEmpty(*currentWorkList)) {
+            currentPart = Pop(*currentWorkList);
           } else {
             stepDone = true;
           }
@@ -494,14 +496,13 @@ This will use verbose output and calculate the integral for the domain:\n\
 #pragma omp single
       {
         //Set the next work list to the current one
-        if (!IsEmpty(nextWorkList)) {
+        if (!IsEmpty(*nextWorkList)) {
+          delete currentWorkList;
           currentWorkList = nextWorkList;
-          Clear(nextWorkList);
+          nextWorkList = new List<pair<civector, pair<real, int> > >;
           done = false;
-          //cout << "Continuing" << endl;
         } else {
           done = true;
-          //cout << "Done!" << endl;
         }
       }
       //Reset variables
