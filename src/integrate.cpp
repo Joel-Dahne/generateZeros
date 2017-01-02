@@ -410,15 +410,6 @@ This will use verbose output and calculate the integral for the domain:\n\
   
   //Initiate the citaylor class
   citaylor tmp;
-
-  //Split the current integration parts a few times to avoid a problem
-  //with parallization
-  pair<civector, pair<real, int> > p1, p2;
-  for (int i = 0; i < 24; ++i) {
-    splitIntegrationPart(Pop(currentWorkList), p1, p2);
-    currentWorkList += p1;
-    currentWorkList += p2;
-  }
   
 #pragma omp parallel
   {
