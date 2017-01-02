@@ -145,17 +145,16 @@ void splitDomain(const civector &domain, civector &D1, civector &D2) {
 
 //Take a part of the integral, split the domain and adjust the
 //tolerance
-void splitIntegrationPart(const pair<civector, pair<real, int> > &part,
-                          pair<civector, pair<real, int> > &p1,
-                          pair<civector, pair<real, int> > &p2) {
+void splitIntegrationPart(const pair<civector, int> &part,
+                          pair<civector, int> &p1,
+                          pair<civector, int> &p2) {
   civector D1, D2;
-  real tol = part.second.first/2;
-  int side = part.second.second;
+  int side = part.second;
 
   splitDomain(part.first, D1, D2);
   
-  p1 = make_pair(D1, make_pair(tol, side));
-  p2 = make_pair(D2, make_pair(tol, side));
+  p1 = make_pair(D1, side);
+  p2 = make_pair(D2, side);
 }
 
 //Computes the square of the length of the vector
@@ -266,7 +265,7 @@ This will use verbose output and calculate the integral for the domain:\n\
   interval parameter = interval(0);
 
   //Tolerance to use
-  real tol(1);
+  real originalTol(1);
 
   //Sides to integrate
   vector<int> sides;
@@ -286,7 +285,7 @@ This will use verbose output and calculate the integral for the domain:\n\
         parameter = interval(atof(optarg));
         break;
       case 't':
-        tol = atof(optarg);
+        originalTol = atof(optarg);
         break;
       case 's':
         if (atoi(optarg) >= 0 && atoi(optarg) <=7) {
@@ -338,8 +337,8 @@ This will use verbose output and calculate the integral for the domain:\n\
     }
   }
   
-  List<pair<civector, pair<real, int> > > * currentWorkList;
-  currentWorkList = new List<pair<civector, pair<real, int> > >;
+  List<pair<civector, int> > * currentWorkList;
+  currentWorkList = new List<pair<civector, int> >;
 
   for (int j = 0; j < sides.size(); ++j) {
     int i = sides[j];
@@ -363,7 +362,7 @@ This will use verbose output and calculate the integral for the domain:\n\
       Im(side[2]) = interval(SupIm(side[2]));
     }
     
-    *currentWorkList += make_pair(side, make_pair(tol/(int)sides.size(), i));
+    *currentWorkList += make_pair(side, i);
   }
 
   //For storing the result of the integral
@@ -404,17 +403,19 @@ This will use verbose output and calculate the integral for the domain:\n\
   }
 
   //For storing the sides to integrate next iteration
-  List<pair<civector, pair<real, int> > > * nextWorkList;
-  nextWorkList = new List<pair<civector, pair<real, int> > >;
+  List<pair<civector, int> > * nextWorkList;
+  nextWorkList = new List<pair<civector, int> >;
 
   //For storing current step
   int step = 0;
   //For checking if all steps are done
   bool done(false);
   //For storing completed and left parts
-  int partsLeft = 0;
+  int partsLeft = sides.size();
   int partsDone = 0;
   int partsFailed = 0;
+  //The tolerance to use for each part
+  real tol = originalTol/partsLeft;
   
   //Initiate the citaylor class
   citaylor tmp;
@@ -423,10 +424,9 @@ This will use verbose output and calculate the integral for the domain:\n\
   {
     //initiate variables
     //For storing integral part
-    pair<civector, pair<real, int> > currentPart, newPart1, newPart2;
+    pair<civector, int> currentPart, newPart1, newPart2;
     //For storing info from currentPart
     civector currentDomain;
-    real tol;
     int side;
     //For storint integral evaluations
     cinterval integrandEnclosure;
@@ -463,8 +463,7 @@ This will use verbose output and calculate the integral for the domain:\n\
         ok = true;
       
         currentDomain = currentPart.first;
-        tol = currentPart.second.first;
-        side = currentPart.second.second;
+        side = currentPart.second;
 
         integrandEnclosure = integrand(currentDomain, side, ok, parameter);
         domainVolume = volume(currentDomain, side);
@@ -510,12 +509,16 @@ This will use verbose output and calculate the integral for the domain:\n\
 #pragma omp single
       {
 
+        //Set new tolerance
+        tol = (originalTol - diam(Re(integral)))/partsLeft;
+        
         if (verbose) {
           cout << "Step " << step << endl;
           cout << "Parts done: " << partsDone << ", parts left: " << partsLeft << endl;
           cout << "Failed integrations: " << partsFailed << endl;
           cout << "Current integral: " << tmpIntegral << endl;
           cout << "Completed interal: " << integral << endl;
+          cout << "Tolerance: " << tol << endl;
         }
         step += 1;
         partsDone = 0;
@@ -527,7 +530,7 @@ This will use verbose output and calculate the integral for the domain:\n\
         if (!IsEmpty(*nextWorkList)) {
           delete currentWorkList;
           currentWorkList = nextWorkList;
-          nextWorkList = new List<pair<civector, pair<real, int> > >;
+          nextWorkList = new List<pair<civector, int> >;
           done = false;
         } else {
           done = true;
