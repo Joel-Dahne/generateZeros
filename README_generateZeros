@@ -1,0 +1,74 @@
+Installing and using generateZeros
+
+REQUIREMENTS:
+        - C++ Compiler (e.g.the GNU gcc)
+        - INSTALLED Version of CXS-C
+        - The citaylor add-on to CXS-C
+
+	CXS-C and citaylor are available at
+	 'www.math.uni-wuppertal.de/~xsc/'
+         The CXS-C package at
+         'http://www2.math.uni-wuppertal.de/~xsc/xsc/cxsc_new.html'
+         and the citaylor package at
+         'http://www2.math.uni-wuppertal.de/~xsc/xsc/cxsc_software.html#taylor'
+
+         The version of CXS-C used were 2.5.4 but it might work with
+         other version.
+
+CONTENTS:
+        - generateZeros.cpp       -- Main program
+        - function.cpp            -- A file for the function
+        - function.hpp            -- Header for the function
+        - makefile                -- makefile for the program
+        - README                  -- This file
+
+COMPILATION: To compile the program you need to place all of the above
+listed files together with the files containing the citaylor
+implementation, i.e. citaylor.cpp and citaylor.hpp, in a folder. You
+also need to change the line
+
+CXSCDIR=/your/path/here
+
+in the makefile to point to your CXS-C directory, usually
+/home/USERNAME/cxsc. When this is done you compile by calling 'make
+all'.
+
+FUNCTION: The function that the program will use is implemented in the
+function.cpp file were you can find some examples. To add you own
+function you need to replace the code in 'function1' and
+'function2'. For information of how to implement the function you can
+either look at the examples or check the documentation of CXS-C and
+citaylor. Note that the program needs to be recompiled after changing
+the function (by calling 'make all' again).
+
+RUNNING: To run the program you call it with some options together
+with the domain you want to search for zeros. Calling the program with
+no arguments will print the usage information.
+
+EXAMPLES: We will here give examples on some different ways to call
+the program and what it yields.
+
+1. ./generateZeros -v -t 5 -- -1 1 -2 2 -3 3 -4 4
+
+This will run the program using verbose (-v) output, it will run for 5
+seconds (-t 5) and use the domain [-1, 1]+i[-2, 2]x[-3, 3]+i[-4, 4].
+
+2. ./generateZeros -n 10 -- 0 450 0 450 0 450 0 450
+
+This will run the program until 10 zeros are found (-n 10) using the
+domain [0, 450]+i[0, 450]x[0, 450]+i[0, 450].
+
+The output of the program will always be to stdout, if you want to save
+the result in a file you can use the pipe-function in bash.
+
+3. ./generateZeros -s 10000 -p 2.5 -- -2 2 -2 2 -2 2 -2 2 > out.txt
+
+This will run 10000 steps (-s 10000) giving the parameter 2.5 (-p 2.5)
+to the function using the given domain and print the result in
+out.txt.
+
+4. ./generateZeros -t 3600 -n 100 -i -- -1e5 1e5 -1e5 1e5 -1e5 1e5 -1e5 1e5 | tee out.txt
+
+This will run the program for 3600 seconds (-t 3600) OR until 100
+zeros are found (-n 100). The output will be both to standard output and the
+file out.txt.
