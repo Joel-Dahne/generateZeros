@@ -374,7 +374,6 @@ This will use verbose output and calculate the integral for the domain:\n\
   for (int i = 0; i < 8; ++i) {
     sideIntegral[i] = cinterval(interval(0), interval(0));
     tmpSideIntegral[i] = cinterval(interval(0), interval(0));
-
   }
 
   //For storing number of calls
@@ -496,6 +495,7 @@ This will use verbose output and calculate the integral for the domain:\n\
             partsFailed += 1;
           } else {
             tmpIntegral += currentIntegral;
+            tmpSideIntegral[side] += currentIntegral;
           }
 
           if (!IsEmpty(*currentWorkList)) {
@@ -517,6 +517,10 @@ This will use verbose output and calculate the integral for the domain:\n\
           cout << "Step " << step << endl;
           cout << "Parts done: " << partsDone << ", parts left: " << partsLeft << endl;
           cout << "Failed integrations: " << partsFailed << endl;
+          for (int i = 0; i < sides.size(); i++) {
+            int j = sides[i];
+            cout << "Current integral side " << j << ": " << tmpSideIntegral[j] << endl;
+          }
           cout << "Current integral: " << tmpIntegral << endl;
           cout << "Completed interal: " << integral << endl;
           cout << "Tolerance: " << tol << endl;
@@ -526,6 +530,9 @@ This will use verbose output and calculate the integral for the domain:\n\
         partsLeft = 0;
         partsFailed = 0;
         tmpIntegral = integral;
+        for (int i = 0; i < 8; ++i) {
+          tmpSideIntegral[i] = sideIntegral[i];
+        }
         
         //Set the next work list to the current one
         if (!IsEmpty(*nextWorkList)) {
