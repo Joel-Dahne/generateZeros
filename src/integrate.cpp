@@ -416,6 +416,7 @@ This will use verbose output and calculate the integral for the domain:\n\
   int partsFailed = 0;
   //The tolerance to use for each part
   real tol = originalTol/partsLeft;
+  partsLeft = 0;
   
   //Initiate the citaylor class
   citaylor tmp;
