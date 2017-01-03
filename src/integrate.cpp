@@ -525,6 +525,24 @@ This will use verbose output and calculate the integral for the domain:\n\
           cout << "Completed interal: " << integral << endl;
           cout << "Tolerance: " << tol << endl;
         }
+        
+        //Check if the tolerance is met
+        if ((diam(Re(tmpIntegral)) < originalTol) && partsFailed == 0) {
+          integral = tmpIntegral;
+          for (int i = 0; i < 8; ++i) {
+            sideIntegral[i] = tmpSideIntegral[i];
+          } 
+          done = true;
+        }
+        
+        //If not done set the next work list to the current one
+        if (!IsEmpty(*nextWorkList) && !done) {
+          delete currentWorkList;
+          currentWorkList = nextWorkList;
+          nextWorkList = new List<pair<civector, int> >;
+        } else {
+          done = true;
+        }
         step += 1;
         partsDone = 0;
         partsLeft = 0;
@@ -532,16 +550,6 @@ This will use verbose output and calculate the integral for the domain:\n\
         tmpIntegral = integral;
         for (int i = 0; i < 8; ++i) {
           tmpSideIntegral[i] = sideIntegral[i];
-        }
-        
-        //Set the next work list to the current one
-        if (!IsEmpty(*nextWorkList)) {
-          delete currentWorkList;
-          currentWorkList = nextWorkList;
-          nextWorkList = new List<pair<civector, int> >;
-          done = false;
-        } else {
-          done = true;
         }
       }
       //Reset variables
