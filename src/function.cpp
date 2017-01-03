@@ -71,6 +71,24 @@ citaylor function1(citaylor &z1, citaylor &z2, bool &ok,
   return sin(z1) + sqr(z1) + exp(z2) - cos(2*z2);
   */
   /*
+  //Example 2 - Hard coded derivative
+  cinterval z1i = get_j_coef(z1, 0);
+  cinterval z2i = get_j_coef(z2, 0);
+  citaylor tmp;
+  //std::cerr << "Hej" << std::endl;
+  if (get_j_coef(z1, 1) == cinterval(1)) {
+    civector z(0, 1);
+    z[0] = sin(z1i) + sqr(z1i) + exp(z2i) - cos(2*z2i);
+    z[1] = -cos(z1i) + 2*z1i + exp(z2i) - cos(2*z2i);
+    return citaylor(z);
+  } else if (get_j_coef(z2, 1) == cinterval(1)) {
+    civector z(0, 1);
+    z[0] = sin(z1i) + sqr(z1i) + exp(z2i) - cos(2*z2i);
+    z[1] = sin(z1i) + sqr(z1i) + exp(z2i) - 2*sin(2*z2i);
+    return citaylor(z);
+  }
+  */
+  /*
   //Example 3 - 2d real saddle point problem
   
   //First check that the function is well defined on the domain
@@ -105,6 +123,24 @@ citaylor function2(citaylor &z1, citaylor &z2, bool &ok,
   //Example 2 - The function f(z1, z2) = (sin(z1) + (z1)^2 +
   //e^{z2} - cos(2(z2)), cos(z1) + (z2)^3 + e^{2(z2)} - 2)
   return cos(z1) + sqr(z2)*z2 + exp(2*z2) - 2;
+  */
+  /*
+  //Example 2 - Hard coded derivative
+  cinterval z1i = get_j_coef(z1, 0);
+  cinterval z2i = get_j_coef(z2, 0);
+  citaylor tmp;
+  //std::cerr << "Hej" << std::endl;
+  if (get_j_coef(z1, 1) == cinterval(1)) {
+    civector z(0, 1);
+    z[0] = cos(z1i) + sqr(z2i)*z2i + exp(2*z2i) - 2;
+    z[1] = sin(z1i) + sqr(z2i)*z2i + exp(2*z2i);
+    return citaylor(z);
+  } else if (get_j_coef(z2, 1) == cinterval(1)) {
+    civector z(0, 1);
+    z[0] = cos(z1i) + sqr(z2i)*z2i + exp(2*z2i) - 2;
+    z[1] = cos(z1i) + 3*sqr(z2i) + exp(z2i);
+    return citaylor(z);
+  }
   */
   /*
   //Example 3 - 2d real saddle point problem
