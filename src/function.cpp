@@ -113,7 +113,7 @@ citaylor function1(citaylor &z1, citaylor &z2, bool &ok,
   */
 
   //Example 5 - A polynomial function
-  return 4e-5*sqr(sqr(z1))*z1*sqr(z2)+2e-3*z1*sqr(sqr(z2))+2*sqr(z1)*z2-z2+0.75;
+  return 4e-5*sqr(sqr(z1))*z1*sqr(z2)+2e-3*z1*sqr(sqr(z2))+2*sqr(z1)*z2-z2+real(0.75);
 }
 
 //Function 2
@@ -172,7 +172,7 @@ citaylor function2(citaylor &z1, citaylor &z2, bool &ok,
                  sqr(cos(z1-z2))*z2) - twoC*z2);
   */
   //Example 5 - A polynomial function
-  return 3e-4*z1*sqr(sqr(z2))-7e-6*z1*sqr(z1)+2*z1*sqr(z2)-z1+0.75;
+  return 3e-4*z1*sqr(sqr(z2))-7e-6*z1*sqr(z1)+2*z1*sqr(z2)-z1+real(0.75);
 }
 
 
