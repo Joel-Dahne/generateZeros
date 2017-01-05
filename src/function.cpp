@@ -70,7 +70,7 @@ citaylor function1(citaylor &z1, citaylor &z2, bool &ok,
   //e^{z2} - cos(2(z2)), cos(z1) + (z2)^3 + e^{2(z2)} - 2)
   return sin(z1) + sqr(z1) + exp(z2) - cos(2*z2);
   */
-  
+  /*
   //Example 2 - Hard coded derivative
   cinterval z1i = get_j_coef(z1, 0);
   cinterval z2i = get_j_coef(z2, 0);
@@ -89,7 +89,7 @@ citaylor function1(citaylor &z1, citaylor &z2, bool &ok,
       return citaylor(z);
     }
   }
-  
+  */
   /*
   //Example 3 - 2d real saddle point problem
   
@@ -111,6 +111,9 @@ citaylor function1(citaylor &z1, citaylor &z2, bool &ok,
   return A2*(sqr(part) + 2*part*cos(z1-z2)*z2 +
              sqr(cos(z1-z2))*sqr(z2)) + twoB*sqr(z2);
   */
+
+  //Example 5 - A polynomial function
+  return 4e-5*sqr(sqr(z1))*z1*sqr(z2)+2e-3*z1*sqr(sqr(z2))+2*sqr(z1)*z2-z2+0.75;
 }
 
 //Function 2
@@ -126,7 +129,7 @@ citaylor function2(citaylor &z1, citaylor &z2, bool &ok,
   //e^{z2} - cos(2(z2)), cos(z1) + (z2)^3 + e^{2(z2)} - 2)
   return cos(z1) + sqr(z2)*z2 + exp(2*z2) - 2;
   */
-  
+  /*
   //Example 2 - Hard coded derivative
   cinterval z1i = get_j_coef(z1, 0);
   cinterval z2i = get_j_coef(z2, 0);
@@ -145,7 +148,7 @@ citaylor function2(citaylor &z1, citaylor &z2, bool &ok,
       return citaylor(z);
     }
   }
-  
+  */
   /*
   //Example 3 - 2d real saddle point problem
 
@@ -168,6 +171,8 @@ citaylor function2(citaylor &z1, citaylor &z2, bool &ok,
   return z2*(A2*(2*part*cos(z1) + cos(z1) - 2*part*cos(z1-z2) -
                  sqr(cos(z1-z2))*z2) - twoC*z2);
   */
+  //Example 5 - A polynomial function
+  return 3e-4*z1*sqr(sqr(z2))-7e-6*z1*sqr(z1)+2*z1*sqr(z2)-z1+0.75;
 }
 
 
