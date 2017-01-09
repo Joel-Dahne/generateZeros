@@ -32,5 +32,11 @@ build/integrate: build/integrate.o build/citaylor.o build/function.o
 build/%.o: src/%.cpp | build
 	g++ -o $@ -fopenmp $(CXSCINC) $(RPATH) -c $< -lcxsc
 
+build/integrateOpt: src/integrate.cpp src/citaylor.cpp src/function.cpp
+	g++ -O3 -o $@ -fopenmp $(CXSCINC) $(RPATH) $^ -lcxsc
+
+build/generateZerosOpt: src/generateZeros.cpp src/citaylor.cpp src/function.cpp
+	g++ -O3 -o $@ -fopenmp $(CXSCINC) $(RPATH) $^ -lcxsc
+
 build:
 	mkdir build
