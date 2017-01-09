@@ -231,7 +231,10 @@ interval volume(const civector &V, const int &side) {
 //The integrand used in integration
 cinterval integrand(civector &domain, const int &side,
                     bool &ok, interval &parameter) {
-
+  if (!ok) {
+    return cinterval(0);
+  }
+  
   citaylor z1, z2, constz1(1, 0), constz2(1, 0);
   
   z1 = citaylor(1, domain[1]);
@@ -243,22 +246,18 @@ cinterval integrand(civector &domain, const int &side,
 
   D1f1 = function1(z1, constz2, ok, parameter);
   if (!ok) {
-    ok = false;
     return cinterval(0);
   }
   D2f1 = function1(constz1, z2, ok, parameter);
   if (!ok) {
-    ok = false;
     return cinterval(0);
   }
   D1f2 = function2(z1, constz2, ok, parameter);
   if (!ok) {
-    ok = false;
     return cinterval(0);
   }
   D2f2 = function2(constz1, z2, ok, parameter);
   if (!ok) {
-    ok = false;
     return cinterval(0);
   }
   
