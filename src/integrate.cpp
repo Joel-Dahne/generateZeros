@@ -163,6 +163,47 @@ inline interval length2(civector &V) {
   return sqr(abs(V[1])) + sqr(abs(V[2]));
 }
 
+//Takes a domain and splits it into 8 smaller domains by cutting along
+//each dimension, except the dimension given by side
+void octasect(civector &domain, int side, civector * newDomains) {
+  
+  int index = side/4;
+  for (int i = 0; i < 4; ++i) {
+    newDomains[i] = domain;
+  }
+  /*
+  interval lowRe  = interval(InfRe(domain[2 - index]), Mid(Re(domain[2 - index])));
+  interval highRe = interval(Mid(Re(domain[2 - index])), SupRe(domain[2 - index]));
+  interval lowIm  = interval(InfIm(domain[2 - index]), Mid(Im(domain[2 - index])));
+  interval highIm = interval(Mid(Im(domain[2 - index])), SupIm(domain[2 - index]));
+
+  newDomains[0][2 - index] = cinterval(lowRe, lowIm);
+  newDomains[1][2 - index] = cinterval(lowRe, highIm);
+  newDomains[2][2 - index] = cinterval(highRe, lowIm);
+  newDomains[3][2 - index] = cinterval(highRe, highIm);
+  
+  for (int i = 0; i < 4; ++i) {
+    newDomains[i + 4] = newDomains[i];
+    if (side/2 % 2 == 1) {
+      SetRe(newDomains[i][index + 1],
+            interval(InfRe(newDomains[i][index + 1]),
+                     Mid(Re(newDomains[i][index + 1]))));
+      SetRe(newDomains[i + 4][index + 1],
+            interval(Mid(Re(newDomains[i + 4][index + 1])),
+                     SupRe(newDomains[i + 4][index + 1])));
+    } else {
+      SetIm(newDomains[i][index + 1],
+            interval(InfIm(newDomains[i][index + 1]),
+                     Mid(Im(newDomains[i][index + 1]))));
+      SetIm(newDomains[i + 4][index + 1],
+            interval(Mid(Im(newDomains[i + 4][index + 1])),
+                     SupIm(newDomains[i + 4][index + 1])));
+    }
+  }
+  */
+  return;
+}
+
 //Calculates the volume of the domain
 //Assumes that the side corresponding to the int side
 //has diameter 0
@@ -419,7 +460,7 @@ This will use verbose output and calculate the integral for the domain:\n\
   
   //Initiate the citaylor class
   citaylor tmp;
-  
+
 #pragma omp parallel
   {
     //initiate variables
