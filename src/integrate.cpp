@@ -171,7 +171,7 @@ void octasect(civector &domain, int side, civector * newDomains) {
   for (int i = 0; i < 4; ++i) {
     newDomains[i] = domain;
   }
-  /*
+  
   interval lowRe  = interval(InfRe(domain[2 - index]), Mid(Re(domain[2 - index])));
   interval highRe = interval(Mid(Re(domain[2 - index])), SupRe(domain[2 - index]));
   interval lowIm  = interval(InfIm(domain[2 - index]), Mid(Im(domain[2 - index])));
@@ -200,7 +200,7 @@ void octasect(civector &domain, int side, civector * newDomains) {
                      SupIm(newDomains[i + 4][index + 1])));
     }
   }
-  */
+  
   return;
 }
 
@@ -365,8 +365,7 @@ This will use verbose output and calculate the integral for the domain:\n\
                         interval(atof(argv[optind + 2]), atof(argv[optind + 3])));
   domain[2] = cinterval(interval(atof(argv[optind + 4]), atof(argv[optind + 5])),
                         interval(atof(argv[optind + 6]), atof(argv[optind + 7])));
-
-
+  
   //Set up the program
 
   //Create a list of the sides to integrate. Each element is a pair,
@@ -469,6 +468,8 @@ This will use verbose output and calculate the integral for the domain:\n\
     //For storing info from currentPart
     civector currentDomain;
     int side;
+    //For storing the octasected domain
+    civector domainSections[8];
     //For storint integral evaluations
     cinterval integrandEnclosure;
     interval domainVolume;
@@ -506,11 +507,16 @@ This will use verbose output and calculate the integral for the domain:\n\
         currentDomain = currentPart.first;
         side = currentPart.second;
 
-        integrandEnclosure = integrand(currentDomain, side, ok, parameter);
-        domainVolume = volume(currentDomain, side);
-
-        currentIntegral = integrandEnclosure*domainVolume*coefs[side];
-
+        octasect(currentDomain, side, domainSections);
+        
+        currentIntegral = 0;
+        for (int i = 0; i < 8; ++i) {
+          integrandEnclosure = integrand(domainSections[i], side, ok, parameter);
+          domainVolume = volume(domainSections[i], side);
+          currentIntegral += integrandEnclosure*domainVolume;
+        }
+        currentIntegral *= coefs[side];
+        
         width = diam(Re(currentIntegral));
 
         partDone = width <= tol && ok;
@@ -552,7 +558,7 @@ This will use verbose output and calculate the integral for the domain:\n\
       {
 
         //Set new tolerance
-        tol = (originalTol - diam(Re(integral)))/partsLeft;
+        tol = (originalTol - diam(Re(integral)))/partsLeft/1.5;
         
         if (verbose) {
           cout << "Step " << step << endl;
