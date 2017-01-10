@@ -57,13 +57,13 @@ cimatrix jacobian_k(const citaylor &D1f1, const citaylor &D2f1,
 
   if (side/4 == 0) {
     J[1][1] = get_j_derive(D1f1, 0);
-    J[1][2] = get_j_derive(D2f1, 0);
-    J[2][1] = get_j_derive(D1f2, 1);
+    J[1][2] = get_j_derive(D2f1, 1);
+    J[2][1] = get_j_derive(D1f2, 0);
     J[2][2] = get_j_derive(D2f2, 1);
   } else {
     J[1][1] = get_j_derive(D1f1, 1);
-    J[1][2] = get_j_derive(D2f1, 1);
-    J[2][1] = get_j_derive(D1f2, 0);
+    J[1][2] = get_j_derive(D2f1, 0);
+    J[2][1] = get_j_derive(D1f2, 1);
     J[2][2] = get_j_derive(D2f2, 0);
   }
     
