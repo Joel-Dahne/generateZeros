@@ -455,6 +455,10 @@ This will use verbose output and calculate the integral for the domain:\n\
   //The tolerance to use for each part
   real tol = originalTol/partsLeft;
   partsLeft = 0;
+  //For storing progress in each step
+  int progress = 0;
+  int progressStep = partsLeft/100;
+  int progressDone = 0;
   
   //Initiate the citaylor class
   citaylor tmp;
@@ -526,6 +530,19 @@ This will use verbose output and calculate the integral for the domain:\n\
         
 #pragma omp critical
         {
+          ++progress;
+          if (progress >= (progressDone + 1)*progressStep) {
+            ++progressDone;
+            if (progressDone == 1) {
+              cout << " " << progressDone << "%" << flush;
+            } else if (progressDone < 10) {
+              cout << "\b\b\b " << progressDone << "%" << flush;
+            } else if (progressDone < 100) {
+              cout << "\b\b\b" << progressDone << "%" << flush;
+            } else if (progressDone == 100) {
+              cout << "\b\b\b" << progressDone << "%" << endl;
+            }
+          }
           ++steps;
           if (!partDone) {
             *nextWorkList += newPart1;
@@ -590,6 +607,9 @@ This will use verbose output and calculate the integral for the domain:\n\
           done = true;
         }
         step += 1;
+        progress = 0;
+        progressStep = partsLeft/100;
+        progressDone = 0;
         partsDone = 0;
         partsLeft = 0;
         partsFailed = 0;
