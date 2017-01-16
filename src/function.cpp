@@ -101,19 +101,14 @@ citaylor function1(citaylor &z1, citaylor &z2, bool &ok,
   //Evaluate the function
   return sqr(ks(z1, z2) + A(z1)) + 2*Ip;
   */
-  /*
-  //Example 4 - Simplified version of example 3
-  cinterval A2 = cinterval(interval(1.5*1.5), interval(0));
-  cinterval twoB = cinterval(interval(2*0.5), interval(0));
-  cinterval twoC = cinterval(interval(2*2.5), interval(0));
-  citaylor part = sin(z1 - z2) - sin(z2);
   
-  return A2*(sqr(part) + 2*part*cos(z1-z2)*z2 +
-             sqr(cos(z1-z2))*sqr(z2)) + twoB*sqr(z2);
-  */
-
+  //Example 4 - Simplified version of example 3
+  return real(2.25)*sqr(sin(z1-z2) - sin(z2) + cos(z1-z2)*z2) + sqr(z2);
+  
+  /*
   //Example 5 - A polynomial function
   return 4e-5*sqr(sqr(z1))*z1*sqr(z2)+2e-3*z1*sqr(sqr(z2))+2*sqr(z1)*z2-z2+real(0.75);
+  */
 }
 
 //Function 2
@@ -161,18 +156,16 @@ citaylor function2(citaylor &z1, citaylor &z2, bool &ok,
   citaylor Az2 = A(z2);
   return sqr(p + Az2) - sqr(ks(z1, z2) + Az2);
   */
-  /*
-  //Example 4 - Simplified version of example 3
-  cinterval A2 = cinterval(interval(1.5*1.5), interval(0));
-  cinterval twoB = cinterval(interval(2*0.5), interval(0));
-  cinterval twoC = cinterval(interval(2*2.5), interval(0));
-  citaylor part = sin(z1 - z2) - sin(z2);
   
-  return z2*(A2*(2*part*cos(z1) + cos(z1) - 2*part*cos(z1-z2) -
-                 sqr(cos(z1-z2))*z2) - twoC*z2);
-  */
+  //Example 4 - Simplified version of example 3
+  citaylor part = sin(z1 - z2) - sin(z2);
+  return real(2.25)*(sqr(cos(z1)*z2 + part) -
+                     sqr(part + cos(z1-z2)*z2)) - 5*sqr(z2);
+  
+  /*
   //Example 5 - A polynomial function
   return 3e-4*z1*sqr(sqr(z2))-7e-6*z1*sqr(z1)+2*z1*sqr(z2)-z1+real(0.75);
+  */
 }
 
 
