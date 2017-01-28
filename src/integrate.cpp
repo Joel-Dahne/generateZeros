@@ -360,22 +360,15 @@ This will use verbose output and calculate the integral for the domain:\n\
     int i = sides[j];
     civector side = domain;
 
-    if (i == 0) {
-      Re(side[1]) = interval(InfRe(side[1]));
-    } else if (i == 1) {
-      Re(side[1]) = interval(SupRe(side[1]));
-    } else if (i == 2) {
-      Im(side[1]) = interval(InfIm(side[1]));
-    } else if (i == 3) {
-      Im(side[1]) = interval(SupIm(side[1]));
-    } else if (i == 4) {
-      Re(side[2]) = interval(InfRe(side[2]));
-    } else if (i == 5) {
-      Re(side[2]) = interval(SupRe(side[2]));
-    } else if (i == 6) {
-      Im(side[2]) = interval(InfIm(side[2]));
-    } else if (i == 7) {
-      Im(side[2]) = interval(SupIm(side[2]));
+    switch (i) {
+    case 0: Re(side[1]) = interval(InfRe(side[1])); break;
+    case 1: Re(side[1]) = interval(SupRe(side[1])); break;
+    case 2: Im(side[1]) = interval(InfIm(side[1])); break;
+    case 3: Im(side[1]) = interval(SupIm(side[1])); break;
+    case 4: Re(side[2]) = interval(InfRe(side[2])); break;
+    case 5: Re(side[2]) = interval(SupRe(side[2])); break;
+    case 6: Im(side[2]) = interval(InfIm(side[2])); break;
+    case 7: Im(side[2]) = interval(SupIm(side[2])); break;
     }
     
     *currentWorkList += make_pair(side, i);
@@ -399,22 +392,17 @@ This will use verbose output and calculate the integral for the domain:\n\
   cinterval coefs[8];
   for (int i = 0; i < 8; ++i) {
     coefs[i] = cinterval(interval(0), 1/(-2*PI2));
-    if (i == 0)
-      coefs[i] *= -I;
-    else if (i == 1)
-      coefs[i] *= I;
-    else if (i == 2)
-      coefs[i] *= 1;
-    else if (i == 3)
-      coefs[i] *= -1;
-    else if (i == 4)
-      coefs[i] *= -I;
-    else if (i == 5)
-      coefs[i] *= I;
-    else if (i == 6)
-      coefs[i] *= 1;
-    else
-      coefs[i] *= -1;
+
+    switch (i) {
+    case 0: coefs[i] *= -I; break;
+    case 1: coefs[i] *=  I; break;
+    case 2: coefs[i] *=  1; break;
+    case 3: coefs[i] *= -1; break;
+    case 4: coefs[i] *= -I; break;
+    case 5: coefs[i] *=  I; break;
+    case 6: coefs[i] *=  1; break;
+    case 7: coefs[i] *= -1; break;
+    }
   }
 
   //For storing the sides to integrate next iteration
