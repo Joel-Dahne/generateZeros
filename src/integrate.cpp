@@ -70,27 +70,6 @@ cimatrix jacobian_k(const citaylor &D1f1, const citaylor &D2f1,
   return J;
 }
 
-//The jacobian with the kth column replaced with
-//[f_1, ..., f_n]^T
-cimatrix jacobian_k(const cimatrix &jacobian, const civector &function,
-                    const int &side) {
-  cimatrix J(2, 2);
-
-  if (side/4 == 0) {
-    J[1][1] = function[1];
-    J[1][2] = function[2];
-    J[2][1] = jacobian[2][1];
-    J[2][2] = jacobian[2][2];
-  } else {
-    J[1][1] = jacobian[1][1];
-    J[1][2] = jacobian[1][2];
-    J[2][1] = function[1];
-    J[2][2] = function[2];
-  }
-    
-  return J;
-}
-
 //Computes the determinant of a 2x2 matrix
 inline cinterval det(cimatrix &M) {
   return M[1][1]*M[2][2] - M[1][2]*M[2][1];
@@ -272,10 +251,8 @@ cinterval integrand(civector &domain, const int &side,
     return cinterval(0);
   }
 
-  //cimatrix J = jacobian(domain, ok, parameter);
   cimatrix J = jacobian(D1f1, D2f1, D1f2, D2f2);
   
-  //cimatrix J_k = jacobian_k(J, enclosure, side);
   cimatrix J_k = jacobian_k(D1f1, D2f1, D1f2, D2f2, side);
 
   return det(J)*conj(det(J_k))/sqr(fLength2);
