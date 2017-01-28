@@ -498,14 +498,16 @@ This will use verbose output and calculate the integral for the domain:\n\
           ++progress;
           if (progress >= (progressDone + 1)*progressStep) {
             ++progressDone;
-            if (progressDone == 1) {
-              cout << " " << progressDone << "%" << flush;
-            } else if (progressDone < 10) {
-              cout << "\b\b\b " << progressDone << "%" << flush;
-            } else if (progressDone < 100) {
-              cout << "\b\b\b" << progressDone << "%" << flush;
-            } else if (progressDone == 100) {
-              cout << "\b\b\b" << progressDone << "%" << endl;
+            if (verbose) {
+              if (progressDone == 1) {
+                cout << " " << progressDone << "%" << flush;
+              } else if (progressDone < 10) {
+                cout << "\b\b\b " << progressDone << "%" << flush;
+              } else if (progressDone < 100) {
+                cout << "\b\b\b" << progressDone << "%" << flush;
+              } else if (progressDone == 100) {
+                cout << "\b\b\b" << progressDone << "%" << endl;
+              }
             }
           }
           ++steps;
