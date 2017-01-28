@@ -47,6 +47,25 @@ return (a * cinterval(Re(b), -Im(b))) / (sqr(Re(b)) + sqr(Im(b)));
 This all you need to change and you will not need to recompile the
 library.
 
+### Compiling the program
+
+To be able to compile the program you will first need to add the path
+to your C-XSC installation in the `makefile`. Set the variable
+`CXSCDIR` to point to the path of your installation, usually this is
+
+```
+CXSCDIR=/home/USERNAME/cxsc
+```
+
+To compile the program call `make all` while in the root of the
+project. This will create the two programs `integrate` and
+`generateZeros` in the directory `build`. You can also compile
+optimized versions of the program, this gives longer compiling times
+but improves the performance of the program. To do this call `make
+build/integrateOpt` or `make build/generateZerosOpt` which will create
+the two programs `integrateOpt` and `generateZerosOpt` in the `build`
+directory.
+
 ## Examples
 
 TODO
