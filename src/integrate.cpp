@@ -598,15 +598,17 @@ This will use verbose output and calculate the integral for the domain:\n\
     }
   }
 
-  for (int i = 0; i < sides.size(); i++) {
-    int j = sides[i];
-    cout << "Integral side " << j << ": " << sideIntegral[j] << endl;
-  }
-  
-  cout << "Total integral: " << integral << endl;
-
   if (verbose) {
+    for (int i = 0; i < sides.size(); i++) {
+      int j = sides[i];
+      cout << "Integral side " << j << ": " << sideIntegral[j] << endl;
+    }
+    
+    cout << "Total integral: " << integral << endl;
+    
     cout << "Number of steps used: " << steps << endl;
+  } else {
+    cout << integral << endl;
   }
   
   return 0;
