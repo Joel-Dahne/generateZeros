@@ -66,6 +66,37 @@ build/integrateOpt` or `make build/generateZerosOpt` which will create
 the two programs `integrateOpt` and `generateZerosOpt` in the `build`
 directory.
 
+### A minimal example
+
+We will here give a minimal example to check if the program compiled
+correctly works.
+
+When you download the code the preset function is f(z_1, z_2) = (z_1,
+z_2), i.e the identity in the two dimensional complex space. This of
+course have only one zero, at the origin. We will here use the program
+to prove this.
+
+After having ran `make all` go into the `build` directory and run the
+program with
+
+```
+./integrate -- -1 1 -1 1 -1 1 -1 1
+```
+
+This tells the program compute the logarithmic integral for the domain
+z_1 = [-1, 1] x i[-1, 1], z_2 = [-1, 1] x i[-1, 1]. The answer is the
+number of zeros, counting multiplicity, in the domain. Since we know
+that the number of zeros in the domain is exactly one it should output
+an interval containing the only integer 1. The output is
+
+```
+([  0.603480,  1.524247],[ -0.409304,  0.409304])
+```
+
+indicating that the integral has a value with the real part inside the
+first interval and the imaginary part inside the second interval. We
+see that the value 1 is indeed inside this interval.
+
 ## Examples
 
 TODO
