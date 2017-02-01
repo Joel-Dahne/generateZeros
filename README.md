@@ -10,7 +10,7 @@ analytic functions in a rectangular domain.
 To get the program running you will need an installed copy of
 C-XSC. This is a C++ library for handling interval arithmetic's.
 Information about the library and instructions for installing can be
-found on their [http://www2.math.uni-wuppertal.de/~xsc/](website). The
+found on their [website](http://www2.math.uni-wuppertal.de/~xsc/). The
 version used for this program is 2.5.4.
 
 Unfortunately the complex interval arithmetic in C-XSC is not thread
