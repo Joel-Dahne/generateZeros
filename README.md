@@ -97,6 +97,8 @@ indicating that the integral has a value with the real part inside the
 first interval and the imaginary part inside the second interval. We
 see that the value 1 is indeed inside this interval.
 
+### Changing the function
+
 ## Examples
 
 TODO
