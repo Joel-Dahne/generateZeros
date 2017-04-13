@@ -284,6 +284,7 @@ Options are:\n\
   -t <value> set the tolerance to use, default 1\n\
   -s 0-7 integrate only a specific side, default is all sides\n\
   -v verbose - print more information\n\
+  -a auto stop - stop automatically when containging a unique integer\n\
 Domain should be given after the options as:\n\
 inf(real1) sup(real1) inf(im1) sup(im1) inf(real2) sup(real2) inf(im2) sup(im2)\n\n\
 Example: ./integrate -v -- -1 1 -2 2 -3 3 -4 4\n\
@@ -300,6 +301,9 @@ This will use verbose output and calculate the integral for the domain:\n\
   //Tolerance to use
   real originalTol(1);
 
+  //Stop when containing a unique integer
+  int autoStop = 0;
+
   //Sides to integrate
   vector<int> sides;
   
@@ -310,9 +314,12 @@ This will use verbose output and calculate the integral for the domain:\n\
   opterr = 0;
   int c;
 
-  while ((c = getopt (argc, argv, "p:t:s:v")) != -1)
+  while ((c = getopt (argc, argv, "p:t:s:va")) != -1)
     switch (c)
       {
+      case 'a':
+        autoStop = 1;
+        break;
       case 'p':
         parameterSet = 1;
         parameter = interval(atof(optarg));
@@ -571,9 +578,16 @@ This will use verbose output and calculate the integral for the domain:\n\
           cout << "Completed interal: " << integral << endl;
           cout << "Tolerance: " << tol << endl;
         }
-        
-        //Check if the tolerance is met
-        if ((diam(Re(tmpIntegral)) < originalTol) && partsFailed == 0) {
+
+        //Check if the tolerance is met or, if autoStop is set, if the
+        //interval contains a unique integer
+        if ((diam(Re(tmpIntegral)) < originalTol) && partsFailed == 0 ||
+            autoStop == 1 && partsFailed == 0 &&
+            ceil(InfRe(tmpIntegral)) != -2147483648 && //To avoid
+                                                       //error when
+                                                       //numbers to
+                                                       //large
+            ceil(InfRe(tmpIntegral)) == ifloor(SupRe(tmpIntegral))) {
           integral = tmpIntegral;
           for (int i = 0; i < 8; ++i) {
             sideIntegral[i] = tmpSideIntegral[i];
