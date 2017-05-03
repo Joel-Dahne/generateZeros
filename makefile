@@ -2,8 +2,8 @@
 # THIS NEEDS TO BE CHANGED TO MATCH YOUR SYSTEM
 CXSCDIR=/home/urathai/cxsc
 
-LINK_TARGETS = build/generateZeros build/integrate
-OBJS = build/generateZeros.o build/integrate.o build/citaylor.o	\
+LINK_TARGETS = build/generateZeros build/integrate build/bisection
+OBJS = build/generateZeros.o build/integrate.o build/bisection.o build/citaylor.o	\
 build/function.o
 REBUILDABLES = $(OBJS) $(LINK_TARGETS)
 
@@ -27,6 +27,9 @@ build/generateZeros: build/generateZeros.o build/citaylor.o build/function.o
 	g++ -o $@ $(CXSCFLAGS) $(RPATH) $^ -lcxsc
 
 build/integrate: build/integrate.o build/citaylor.o build/function.o
+	g++ -o $@ $(CXSCFLAGS) $(RPATH) $^ -lcxsc
+
+build/bisection: build/bisection.o build/citaylor.o build/function.o
 	g++ -o $@ $(CXSCFLAGS) $(RPATH) $^ -lcxsc
 
 build/%.o: src/%.cpp | build
