@@ -48,6 +48,65 @@ const interval PI(Pi());       // An enclosure of pi.
 const interval PI2(sqr(Pi()));       // An enclosure of pi.
 const cinterval I(interval(0), interval(1)); //An enclosure of i
 
+//****************************************
+//Handling the jacobians
+//****************************************
+
+//Calculate the jacobian
+cimatrix jacobian(const civector &domain, bool &ok, const interval &parameter) {
+  cimatrix J(2, 2);
+
+  citaylor z2(1, 0);
+  
+  //Compute df1/dz1 and df2/dz1
+  citaylor z1 = citaylor(1, domain[1]);
+  z2 = domain[2];
+  J[1][1] = get_j_derive(function1(z1, z2, ok, parameter), 1);
+  J[2][1] = get_j_derive(function2(z1, z2, ok, parameter), 1);
+
+  //Compute df1/dz2 and df2/dz2
+  z1 = domain[1];
+  z2 = citaylor(1, domain[2]);
+  J[1][2] = get_j_derive(function1(z1, z2, ok, parameter), 1);
+  J[2][2] = get_j_derive(function2(z1, z2, ok, parameter), 1);
+
+  return J;
+}
+
+//Computes the determinant of a 2x2 matrix
+cinterval det(const cimatrix &M) {
+  return M[1][1]*M[2][2] - M[1][2]*M[2][1];
+}
+
+//Calculate the inverse
+cimatrix inverse(const cimatrix &M, bool &ok) {
+  cinterval determinant = det(M);
+  
+  if (0 <= determinant) {
+    ok = false;
+    return M;
+  }
+
+  cimatrix inverse(2, 2);
+
+  inverse[1][1] = M[2][2];
+  inverse[1][2] = -M[1][2];
+  inverse[2][1] = -M[2][1];
+  inverse[2][2] = M[1][1];
+
+  inverse /= determinant;  
+
+  return inverse;
+}
+
+//****************************************
+//End of Handling the Jacobians
+//****************************************
+
+//****************************************
+//Handling civectors in different ways
+//****************************************
+
 void splitDomain(const civector &domain, civector &D1, civector &D2) {
   //Find the widest interval
   cvector widths = diam(domain);
@@ -84,27 +143,33 @@ void splitDomain(const civector &domain, civector &D1, civector &D2) {
   }
 }
 
-//Calculate the jacobian
-cimatrix jacobian(const civector &domain, bool &ok, const interval &parameter) {
-  cimatrix J(2, 2);
-
-  citaylor z2(1, 0);
-  
-  //Compute df1/dz1 and df2/dz1
-  citaylor z1 = citaylor(1, domain[1]);
-  z2 = domain[2];
-  J[1][1] = get_j_derive(function1(z1, z2, ok, parameter), 1);
-  J[2][1] = get_j_derive(function2(z1, z2, ok, parameter), 1);
-
-  //Compute df1/dz2 and df2/dz2
-  z1 = domain[1];
-  z2 = citaylor(1, domain[2]);
-  J[1][2] = get_j_derive(function1(z1, z2, ok, parameter), 1);
-  J[2][2] = get_j_derive(function2(z1, z2, ok, parameter), 1);
-
-  return J;
+//Determine if two intervals are disjoint
+bool disjoint(interval &x1, interval &x2) {
+  return Sup(x1) < Inf(x2) || Inf(x1) > Sup(x2); 
 }
 
+//Determines if to complex interval vector are disjoint
+bool disjoint(civector &z1, civector &z2) {
+  return disjoint(Re(z1[1]), Re(z2[1])) || disjoint(Im(z1[1]), Im(z2[1])) ||
+    disjoint(Re(z1[2]), Re(z2[2])) || disjoint(Im(z1[2]), Im(z2[2]));
+}
+
+//Compute the mid point of a domain
+civector Mid(civector &domain) {
+  civector midPoint(2);
+
+  for (int i = 1; i <= 2; i++) {
+    midPoint[i] = cinterval(mid(domain[i]));
+  }
+  
+  return midPoint;
+}
+
+//****************************************
+//End of Handling civectors in different ways
+//****************************************
+
+//Check if the enclosure of the function on the domain contains a zero
 bool zeroInDomain(civector &domain, bool &ok, interval parameter) {
   citaylor z1, z2;
   cinterval f1, f2;
@@ -117,52 +182,6 @@ bool zeroInDomain(civector &domain, bool &ok, interval parameter) {
   return (0<=f1 && 0<=f2 && ok);
 }
 
-//Computes the determinant of a 2x2 matrix
-cinterval det(const cimatrix &M) {
-  return M[1][1]*M[2][2] - M[1][2]*M[2][1];
-}
-
-//Determine if two intervals are disjoint
-bool disjoint(interval &x1, interval &x2) {
-  return Sup(x1) < Inf(x2) || Inf(x1) > Sup(x2); 
-}
-
-//Determines if to complex interval vector are disjoint
-bool disjoint(civector &z1, civector &z2) {
-  return disjoint(Re(z1[1]), Re(z2[1])) || disjoint(Im(z1[1]), Im(z2[1])) ||
-    disjoint(Re(z1[2]), Re(z2[2])) || disjoint(Im(z1[2]), Im(z2[2]));
-}
-
-//Calculate the inverse
-cimatrix inverse(const cimatrix &M, bool &ok) {
-  cinterval determinant = det(M);
-  
-  if (0 <= determinant) {
-    ok = false;
-    return M;
-  }
-
-  cimatrix inverse(2, 2);
-
-  inverse[1][1] = M[2][2];
-  inverse[1][2] = -M[1][2];
-  inverse[2][1] = -M[2][1];
-  inverse[2][2] = M[1][1];
-
-  inverse /= determinant;  
-
-  return inverse;
-}
-
-civector Mid(civector &domain) {
-  civector midPoint(2);
-
-  for (int i = 1; i <= 2; i++) {
-    midPoint[i] = cinterval(mid(domain[i]));
-  }
-  
-  return midPoint;
-}
 
 civector N(civector &domain, bool &ok, interval parameter) {
   civector mid = Mid(domain);
@@ -200,6 +219,61 @@ civector validate(civector &domain, bool &isZero, bool &ok, interval &parameter)
 }
 
 int main(int argc, char * argv[]) {
+
+  string usage = "Usage: ./bisection [OPTION]... -- [DOMAIN] \n\
+Find all zeros in a domain by using a combination of bisection\n\
+and the Newton interval method\n\n\
+Options are:\n\
+  -p <value> set the parameter for the function to this\n\
+  -v verbose - print more information\n                               \
+Domain should be given after the options as:\n\
+inf(real1) sup(real1) inf(im1) sup(im1) inf(real2) sup(real2) inf(im2) sup(im2)\n\n\
+Example: ./bisection -v -- -1 1 -2 2 -3 3 -4 4\n\
+This will use verbose output and find all zeros in the domain:\n\
+[-1, 1] + i[-2, 2] x [-3, 3] + i[-4, 4]";
+
+  //Read arguments
+  //Read options
+  //Set parameter for the function
+  int parameterSet = 0;
+  interval parameter = interval(0);
+
+  //Verbose output
+  int verbose = 0;
+
+  //Do not print errors
+  opterr = 0;
+  int c;
+
+  while ((c = getopt (argc, argv, "p:v")) != -1)
+    switch (c)
+      {
+      case 'p':
+        parameterSet = 1;
+        parameter = interval(atof(optarg));
+        break;
+      case 'v':
+        verbose = 1;
+        break;
+      case '?':
+        if (optopt == 'p')
+          cerr <<"Option -" << char(optopt) << " requires an argument.\n\n" << endl;
+        else if (isprint (optopt))
+          cerr << "Unknown option `-" << char(optopt) << "'.\n\n" << endl;
+        else
+          cerr << "Unknown option character `" << char(optopt) << "'.\n\n" << endl;
+        cerr << usage << endl;
+        exit(0);
+      default:
+        abort ();
+      }
+
+  //Read domain
+  if (argc - optind < 8) {
+    fprintf (stderr, "To few arguments, cannot read domain.\n\n");
+    cerr << usage << endl;;
+    exit(0);
+  }
   
   civector domain(2);
   domain[1] = cinterval(interval(atof(argv[1]), atof(argv[2])),
