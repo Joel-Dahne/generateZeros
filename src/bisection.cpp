@@ -81,8 +81,8 @@ cinterval det(const cimatrix &M) {
 //Calculate the inverse
 cimatrix inverse(const cimatrix &M, bool &ok) {
   cinterval determinant = det(M);
-  
-  if (0 <= determinant) {
+
+  if (Inf(abs(determinant)) <= 1e-15) {
     ok = false;
     return M;
   }
