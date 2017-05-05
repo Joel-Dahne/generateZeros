@@ -299,28 +299,32 @@ This will use verbose output and find all zeros in the domain:\n\
   int zerosFound = 0;
 
   //Counters for each cycle
-  int partsLeft = 1;
+  int partsLeft = 0;
   int partsDone = 0;
   int partsFailed = 0;
   int partsDiscardedEnclosure = 0;
   int partsDiscardedNewton = 0;
-
-#pragma omp parallelqwe
+#pragma omp parallel
   {
+    //Initiate variable
+    //For storing the domains
     civector currentDomain, newDomain1, newDomain2, zero;
+    //For stroing the jacobian
     cimatrix jac;
-  
+    //For checking results of a domain
     bool ok, isZero, partDone, stepDone(false);
+    //For reason for results of a domain
     bool partFailed, partDiscardedEnclosure, partDiscardedNewton;
 
-  
     while(!done) {
-
-      if (!IsEmpty(*currentWorkList)) {
-        currentDomain = Pop(*currentWorkList);
-        stepDone = false;
-      } else {
-        stepDone = true;
+#pragma omp critical
+      {
+        if (!IsEmpty(*currentWorkList)) {
+          currentDomain = Pop(*currentWorkList);
+          stepDone = false;
+        } else {
+          stepDone = true;
+        }
       }
 
       while (!stepDone) {
@@ -386,31 +390,35 @@ This will use verbose output and find all zeros in the domain:\n\
           }
         }
       }
-
       //Handle going to the next step
-
-      cout << "Step " << step << endl;
-      cout << "Parts done: " << partsDone << ", parts left: " << partsLeft << endl;
-      cout << "Parts discarded from enclosure: " << partsDiscardedEnclosure << endl;
-      cout << "Parts discarded from Newton " << partsDiscardedNewton << endl;
-      cout << "Parts failed " << partsFailed << endl;
+#pragma omp barrier
+#pragma omp single
+      {
+        if (verbose) {
+          cout << "Step " << step << endl;
+          cout << "Parts done: " << partsDone << ", parts left: " << partsLeft << endl;
+          cout << "Parts discarded from enclosure: " << partsDiscardedEnclosure << endl;
+          cout << "Parts discarded from Newton " << partsDiscardedNewton << endl;
+          cout << "Parts failed " << partsFailed << endl;
+        }
     
-      //If not done set the next work list to the current one
-      if (!IsEmpty(*nextWorkList) && !done) {
-        delete currentWorkList;
-        currentWorkList = nextWorkList;
-        nextWorkList = new List<civector>;
-      } else {
-        done = true;
-      }
+        //If not done set the next work list to the current one
+        if (!IsEmpty(*nextWorkList) && !done) {
+          delete currentWorkList;
+          currentWorkList = nextWorkList;
+          nextWorkList = new List<civector>;
+        } else {
+          done = true;
+        }
 
-      // Reset and update counter
-      step+=1;
-      partsDone = 0;
-      partsLeft = 0;
-      partsFailed = 0;
-      partsDiscardedEnclosure = 0;
-      partsDiscardedNewton = 0;  
+        // Reset and update counter
+        step+=1;
+        partsDone = 0;
+        partsLeft = 0;
+        partsFailed = 0;
+        partsDiscardedEnclosure = 0;
+        partsDiscardedNewton = 0;
+      }
     }
   }
 
