@@ -276,13 +276,14 @@ This will use verbose output and find all zeros in the domain:\n\
   }
   
   civector domain(2);
-  domain[1] = cinterval(interval(atof(argv[1]), atof(argv[2])),
-                        interval(atof(argv[3]), atof(argv[4])));
-  domain[2] = cinterval(interval(atof(argv[5]), atof(argv[6])),
-                        interval(atof(argv[7]), atof(argv[8])));
-  
-  interval parameter = interval(0);
-  
+  domain[1] = cinterval(interval(atof(argv[optind]), atof(argv[optind + 1])),
+                        interval(atof(argv[optind + 2]), atof(argv[optind + 3])));
+  domain[2] = cinterval(interval(atof(argv[optind + 4]), atof(argv[optind + 5])),
+                        interval(atof(argv[optind + 6]), atof(argv[optind + 7])));
+
+  //Set up the program
+
+  //Create lists for current and next domains
   List<civector> * currentWorkList;
   currentWorkList = new List<civector>;
   *currentWorkList+=domain;
@@ -290,123 +291,127 @@ This will use verbose output and find all zeros in the domain:\n\
   List<civector> * nextWorkList;
   nextWorkList = new List<civector>;
 
+  //Global variables and counters
   bool done = false;
 
-  // Permanent counters
+  //Permanent counters
   int step = 0;
   int zerosFound = 0;
 
-  // Counters for each cycle
+  //Counters for each cycle
   int partsLeft = 1;
   int partsDone = 0;
   int partsFailed = 0;
   int partsDiscardedEnclosure = 0;
   int partsDiscardedNewton = 0;
+
+#pragma omp parallelqwe
+  {
+    civector currentDomain, newDomain1, newDomain2, zero;
+    cimatrix jac;
   
-  civector currentDomain, newDomain1, newDomain2, zero;
-  cimatrix jac;
-  
-  bool ok, isZero, partDone, stepDone(false);
-  bool partFailed, partDiscardedEnclosure, partDiscardedNewton;
+    bool ok, isZero, partDone, stepDone(false);
+    bool partFailed, partDiscardedEnclosure, partDiscardedNewton;
 
   
-  while(!done) {
+    while(!done) {
 
-    if (!IsEmpty(*currentWorkList)) {
-      currentDomain = Pop(*currentWorkList);
-      stepDone = false;
-    } else {
-      stepDone = true;
-    }
-
-    while (!stepDone) {
-      ok = true;
-      isZero = false;
-      partDone = false;
-      partFailed = false;
-      partDiscardedEnclosure = false;
-      partDiscardedNewton = false;
-      
-      if (zeroInDomain(currentDomain, ok, parameter)) {
-        jac = jacobian(currentDomain, ok, parameter);
-
-        if ((!(0 <= det(jac))) && ok) {
-          zero = validate(currentDomain, isZero, ok, parameter);
-          
-          if (isZero && ok) {
-            partDone = true;
-            cout << "Zero: " << zero << endl;
-          } else if (!isZero && ok) {
-            partDiscardedNewton = true;
-            partDone = true;
-          }
-        }
+      if (!IsEmpty(*currentWorkList)) {
+        currentDomain = Pop(*currentWorkList);
+        stepDone = false;
       } else {
-        partDone = true;
-        partDiscardedEnclosure = true;
+        stepDone = true;
       }
 
-      if (!partDone) {
-        splitDomain(currentDomain, newDomain1, newDomain2);
-      }
+      while (!stepDone) {
+        ok = true;
+        isZero = false;
+        partDone = false;
+        partFailed = false;
+        partDiscardedEnclosure = false;
+        partDiscardedNewton = false;
+      
+        if (zeroInDomain(currentDomain, ok, parameter)) {
+          jac = jacobian(currentDomain, ok, parameter);
+
+          if ((!(0 <= det(jac))) && ok) {
+            zero = validate(currentDomain, isZero, ok, parameter);
+          
+            if (isZero && ok) {
+              partDone = true;
+              cout << "Zero: " << zero << endl;
+            } else if (!isZero && ok) {
+              partDiscardedNewton = true;
+              partDone = true;
+            }
+          }
+        } else {
+          partDone = true;
+          partDiscardedEnclosure = true;
+        }
+
+        if (!partDone) {
+          splitDomain(currentDomain, newDomain1, newDomain2);
+        }
 
 #pragma omp critical
-      {
-        // Update counters
-        if (partDiscardedEnclosure) {
-          partsDiscardedEnclosure+=1;
-        }
-        if (partDiscardedNewton) {
-          partsDiscardedNewton+=1;
-        }
-        if (partFailed) {
-          partsFailed+=1;
-        }
-        if (isZero) {
-          zerosFound+=1;
-        }
+        {
+          // Update counters
+          if (partDiscardedEnclosure) {
+            partsDiscardedEnclosure+=1;
+          }
+          if (partDiscardedNewton) {
+            partsDiscardedNewton+=1;
+          }
+          if (partFailed) {
+            partsFailed+=1;
+          }
+          if (isZero) {
+            zerosFound+=1;
+          }
         
         
-        if (!partDone) {
-          *nextWorkList+=newDomain1;
-          *nextWorkList+=newDomain2;
-          partsLeft+=2;
-        } else {
-          partsDone+=1;
-        }
+          if (!partDone) {
+            *nextWorkList+=newDomain1;
+            *nextWorkList+=newDomain2;
+            partsLeft+=2;
+          } else {
+            partsDone+=1;
+          }
         
-        if (!IsEmpty(*currentWorkList)) {
-          currentDomain = Pop(*currentWorkList);
-        } else {
-          stepDone = true;
+          if (!IsEmpty(*currentWorkList)) {
+            currentDomain = Pop(*currentWorkList);
+          } else {
+            stepDone = true;
+          }
         }
       }
-    }
 
-    //Handle going to the next step
+      //Handle going to the next step
 
-    cout << "Step " << step << endl;
-    cout << "Parts done: " << partsDone << ", parts left: " << partsLeft << endl;
-    cout << "Parts discarded from enclosure: " << partsDiscardedEnclosure << endl;
-    cout << "Parts discarded from Newton " << partsDiscardedNewton << endl;
-    cout << "Parts failed " << partsFailed << endl;
+      cout << "Step " << step << endl;
+      cout << "Parts done: " << partsDone << ", parts left: " << partsLeft << endl;
+      cout << "Parts discarded from enclosure: " << partsDiscardedEnclosure << endl;
+      cout << "Parts discarded from Newton " << partsDiscardedNewton << endl;
+      cout << "Parts failed " << partsFailed << endl;
     
-    //If not done set the next work list to the current one
-    if (!IsEmpty(*nextWorkList) && !done) {
-      delete currentWorkList;
-      currentWorkList = nextWorkList;
-      nextWorkList = new List<civector>;
-    } else {
-      done = true;
-    }
+      //If not done set the next work list to the current one
+      if (!IsEmpty(*nextWorkList) && !done) {
+        delete currentWorkList;
+        currentWorkList = nextWorkList;
+        nextWorkList = new List<civector>;
+      } else {
+        done = true;
+      }
 
-    // Reset and update counter
-    step+=1;
-    partsDone = 0;
-    partsLeft = 0;
-    partsFailed = 0;
-    partsDiscardedEnclosure = 0;
-    partsDiscardedNewton = 0;  
+      // Reset and update counter
+      step+=1;
+      partsDone = 0;
+      partsLeft = 0;
+      partsFailed = 0;
+      partsDiscardedEnclosure = 0;
+      partsDiscardedNewton = 0;  
+    }
   }
 
   cout << "Zeros found: " << zerosFound << endl;
