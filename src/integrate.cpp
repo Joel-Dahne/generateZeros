@@ -241,11 +241,11 @@ cinterval integrand(civector &domain, const int &side,
 
   function(D1f1, D1f2, z1, constz2, ok, parameter);
   if (!ok) {
-      return cinterval(0);
+    return cinterval(0);
   }
   function(D2f1, D2f2, constz1, z2, ok, parameter);
   if (!ok) {
-      return cinterval(0);
+    return cinterval(0);
   }
 
   civector enclosure(2);
@@ -308,41 +308,41 @@ This will use verbose output and calculate the integral for the domain:\n\
 
   while ((c = getopt (argc, argv, "p:t:s:va")) != -1)
     switch (c)
-      {
-      case 'a':
-        autoStop = 1;
-        break;
-      case 'p':
-        parameterSet = 1;
-        parameter = interval(atof(optarg));
-        break;
-      case 't':
-        originalTol = atof(optarg);
-        break;
-      case 's':
-        if (atoi(optarg) >= 0 && atoi(optarg) <=7) {
-          sides.push_back(atoi(optarg));
-        } else {
-          cerr << "Option -s requres an integer between 0 and 7 as argument" << endl;
-          cerr << usage << endl;
-          exit(0);
-        }
-        break;
-      case 'v':
-        verbose = 1;
-        break;
-      case '?':
-        if (optopt == 'p' || optopt == 't' || optopt == 's')
-          cerr <<"Option -" << char(optopt) << " requires an argument.\n\n" << endl;
-        else if (isprint (optopt))
-          cerr << "Unknown option `-" << char(optopt) << "'.\n\n" << endl;
-        else
-          cerr << "Unknown option character `" << char(optopt) << "'.\n\n" << endl;
+    {
+    case 'a':
+      autoStop = 1;
+      break;
+    case 'p':
+      parameterSet = 1;
+      parameter = interval(atof(optarg));
+      break;
+    case 't':
+      originalTol = atof(optarg);
+      break;
+    case 's':
+      if (atoi(optarg) >= 0 && atoi(optarg) <=7) {
+        sides.push_back(atoi(optarg));
+      } else {
+        cerr << "Option -s requres an integer between 0 and 7 as argument" << endl;
         cerr << usage << endl;
         exit(0);
-      default:
-        abort ();
       }
+      break;
+    case 'v':
+      verbose = 1;
+      break;
+    case '?':
+      if (optopt == 'p' || optopt == 't' || optopt == 's')
+        cerr <<"Option -" << char(optopt) << " requires an argument.\n\n" << endl;
+      else if (isprint (optopt))
+        cerr << "Unknown option `-" << char(optopt) << "'.\n\n" << endl;
+      else
+        cerr << "Unknown option character `" << char(optopt) << "'.\n\n" << endl;
+      cerr << usage << endl;
+      exit(0);
+    default:
+      abort ();
+    }
 
   //Read domain
   if (argc - optind < 8) {

@@ -30,7 +30,7 @@
 using namespace cxsc;
 using namespace taylor;
 void function(citaylor &f1, citaylor &f2, citaylor &z1, citaylor &z2,
-                  bool &ok, interval p);
+              bool &ok, interval p);
 
 citaylor function1(citaylor &z1, citaylor &z2, bool &ok,
                    interval p);
@@ -39,7 +39,7 @@ citaylor function2(citaylor &z1, citaylor &z2, bool &ok,
                    interval p);
 
 civector intervalFunction(civector &domain, bool &ok,
-                  interval p);
+                          interval p);
 
 cvector midFunction(cvector &z, bool &ok,
                     interval p);

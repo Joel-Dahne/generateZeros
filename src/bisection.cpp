@@ -54,26 +54,26 @@ const cinterval I(interval(0), interval(1)); //An enclosure of i
 
 //Calculate the jacobian
 cimatrix jacobian(const civector &domain, bool &ok, const interval &parameter) {
-    cimatrix J(2, 2);
-    citaylor f1, f2;
+  cimatrix J(2, 2);
+  citaylor f1, f2;
 
-    citaylor z2(1, 0);
+  citaylor z2(1, 0);
 
-    //Compute df1/dz1 and df2/dz1
-    citaylor z1 = citaylor(1, domain[1]);
-    z2 = domain[2];
-    function(f1, f2, z1, z2, ok, parameter);
-    J[1][1] = get_j_derive(f1, 1);
-    J[2][1] = get_j_derive(f2, 1);
+  //Compute df1/dz1 and df2/dz1
+  citaylor z1 = citaylor(1, domain[1]);
+  z2 = domain[2];
+  function(f1, f2, z1, z2, ok, parameter);
+  J[1][1] = get_j_derive(f1, 1);
+  J[2][1] = get_j_derive(f2, 1);
 
-    //Compute df1/dz2 and df2/dz2
-    z1 = domain[1];
-    z2 = citaylor(1, domain[2]);
-    function(f1, f2, z1, z2, ok, parameter);
-    J[1][2] = get_j_derive(f1, 1);
-    J[2][2] = get_j_derive(f2, 1);
+  //Compute df1/dz2 and df2/dz2
+  z1 = domain[1];
+  z2 = citaylor(1, domain[2]);
+  function(f1, f2, z1, z2, ok, parameter);
+  J[1][2] = get_j_derive(f1, 1);
+  J[2][2] = get_j_derive(f2, 1);
 
-    return J;
+  return J;
 }
 
 //Computes the determinant of a 2x2 matrix
@@ -252,26 +252,26 @@ This will use verbose output and find all zeros in the domain:\n\
 
   while ((c = getopt (argc, argv, "p:v")) != -1)
     switch (c)
-      {
-      case 'p':
-        parameterSet = 1;
-        parameter = interval(atof(optarg));
-        break;
-      case 'v':
-        verbose = 1;
-        break;
-      case '?':
-        if (optopt == 'p')
-          cerr <<"Option -" << char(optopt) << " requires an argument.\n\n" << endl;
-        else if (isprint (optopt))
-          cerr << "Unknown option `-" << char(optopt) << "'.\n\n" << endl;
-        else
-          cerr << "Unknown option character `" << char(optopt) << "'.\n\n" << endl;
-        cerr << usage << endl;
-        exit(0);
-      default:
-        abort ();
-      }
+    {
+    case 'p':
+      parameterSet = 1;
+      parameter = interval(atof(optarg));
+      break;
+    case 'v':
+      verbose = 1;
+      break;
+    case '?':
+      if (optopt == 'p')
+        cerr <<"Option -" << char(optopt) << " requires an argument.\n\n" << endl;
+      else if (isprint (optopt))
+        cerr << "Unknown option `-" << char(optopt) << "'.\n\n" << endl;
+      else
+        cerr << "Unknown option character `" << char(optopt) << "'.\n\n" << endl;
+      cerr << usage << endl;
+      exit(0);
+    default:
+      abort ();
+    }
 
   //Read domain
   if (argc - optind < 8) {

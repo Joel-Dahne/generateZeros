@@ -323,45 +323,45 @@ This will use verbose output, stop when 100 zeros are found and use the domain:\
 
   while ((c = getopt (argc, argv, "n:t:s:l:p:vi")) != -1)
     switch (c)
-      {
-      case 'n':
-        stopOnZeros = 1;
-        maxZeros = atoi(optarg);
-        break;
-      case 't':
-        stopOnTime = 1;
-        maxTime = atoi(optarg);
-        break;
-      case 's':
-        stopOnSteps = 1;
-        maxSteps = atoi(optarg);
-        break;
-      case 'l':
-        stopOnStepsLast = 1;
-        maxStepsLast = atoi(optarg);
-        break;
-      case 'p':
-        parameterSet = 1;
-        parameter = interval(atof(optarg));
-        break;
-      case 'v':
-        verbose = 1;
-        break;
-      case 'i':
-        printIntervals = 1;
-        break;
-      case '?':
-        if (optopt == 't' || optopt == 'n' || optopt == 'l' || optopt == 's' || optopt == 'p')
-          cerr <<"Option -" << char(optopt) << " requires an argument.\n\n" << endl;
-        else if (isprint (optopt))
-          cerr << "Unknown option `-" << char(optopt) << "'.\n\n" << endl;
-        else
-          cerr << "Unknown option character `" << char(optopt) << "'.\n\n" << endl;
-        cerr << usage << endl;
-        exit(0);
-      default:
-        abort ();
-      }
+    {
+    case 'n':
+      stopOnZeros = 1;
+      maxZeros = atoi(optarg);
+      break;
+    case 't':
+      stopOnTime = 1;
+      maxTime = atoi(optarg);
+      break;
+    case 's':
+      stopOnSteps = 1;
+      maxSteps = atoi(optarg);
+      break;
+    case 'l':
+      stopOnStepsLast = 1;
+      maxStepsLast = atoi(optarg);
+      break;
+    case 'p':
+      parameterSet = 1;
+      parameter = interval(atof(optarg));
+      break;
+    case 'v':
+      verbose = 1;
+      break;
+    case 'i':
+      printIntervals = 1;
+      break;
+    case '?':
+      if (optopt == 't' || optopt == 'n' || optopt == 'l' || optopt == 's' || optopt == 'p')
+        cerr <<"Option -" << char(optopt) << " requires an argument.\n\n" << endl;
+      else if (isprint (optopt))
+        cerr << "Unknown option `-" << char(optopt) << "'.\n\n" << endl;
+      else
+        cerr << "Unknown option character `" << char(optopt) << "'.\n\n" << endl;
+      cerr << usage << endl;
+      exit(0);
+    default:
+      abort ();
+    }
 
 
   //Read domain

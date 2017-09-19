@@ -77,53 +77,53 @@ citaylor ks(citaylor &z1, citaylor &z2) {
 void function(citaylor &f1, citaylor &f2, citaylor &z1, citaylor &z2, bool &ok,
               interval p) {
 
-    // Example 1 - The identity function on C^2
-    f1 = z1;
-    f2 = z2;
-    return;
+  // Example 1 - The identity function on C^2
+  f1 = z1;
+  f2 = z2;
+  return;
 
-    /*
-    // Example 2 - A polynomial function
-    citaylor sqrz1 = sqr(z1);
-    citaylor sqrz2 = sqr(z2);
-    citaylor quadz2 = sqr(sqrz2);
-    f1 = 4e-5*sqr(sqrz1)*z1*sqr(z2) + 2e-3*z1*quadz2 +
-        2*sqrz1*z2 - z2 + real(0.75);
-    f2 = 3e-4*z1*quadz2 - 7e-6*z1*sqrz1 + 2*z1*sqrz2 - z1 + real(0.75);
-    return;
-    */
-    /*
-    // Example 3 - The function f(z1, z2) = (sin(z1) + (z1)^2 +
-    // e^{z2} - cos(2(z2)), cos(z1) + (z2)^3 + e^{2(z2)} - 2)
-    f1 = sin(z1) + sqr(z1) + exp(z2) - cos(2*z2);
-    f2 = cos(z1) + sqr(z2)*z2 + exp(2*z2) - 2;
-    return;
-    */
-    /*
-    // Example 4 - Simplified 2d real saddle point problem
-    citaylor sqrz2 = sqr(z2);
-    citaylor sinz2 = sin(z2);
-    citaylor sinz1z2 = sin(z1 - z2);
-    citaylor cosz1z2 = cos(z1 - z2);
-    citaylor part = sinz1z2 - sinz2;
-    f1 = real(2.25)*sqr(sinz1z2 - sinz2 + cosz1z2*z2) + sqrz2;
-    f2 = real(2.25)*(sqr(cos(z1)*z2 + part) - sqr(part + cosz1z2*z2))
-        - 5*sqrz2;
-    */
-    /*
-    // Example 5 - 2d real saddle point problem
-    if (0 <= get_j_derive(z1, 0) - get_j_derive(z2, 0)) {
-        ok = false;
-        f1 = z1;
-        f2 = z2;
-        return;
-    }
-    citaylor ksz1z2 = ks(z1, z2);
-    citaylor Az2 = A(z2);
-    f1 = sqr(ksz1z2 + A(z1)) + 2*Ip;
-    f2 = sqr(p + Az2) - sqr(ksz1z2 + Az2);
-    return;
-    */
+  /*
+  // Example 2 - A polynomial function
+  citaylor sqrz1 = sqr(z1);
+  citaylor sqrz2 = sqr(z2);
+  citaylor quadz2 = sqr(sqrz2);
+  f1 = 4e-5*sqr(sqrz1)*z1*sqr(z2) + 2e-3*z1*quadz2 +
+  2*sqrz1*z2 - z2 + real(0.75);
+  f2 = 3e-4*z1*quadz2 - 7e-6*z1*sqrz1 + 2*z1*sqrz2 - z1 + real(0.75);
+  return;
+  */
+  /*
+  // Example 3 - The function f(z1, z2) = (sin(z1) + (z1)^2 +
+  // e^{z2} - cos(2(z2)), cos(z1) + (z2)^3 + e^{2(z2)} - 2)
+  f1 = sin(z1) + sqr(z1) + exp(z2) - cos(2*z2);
+  f2 = cos(z1) + sqr(z2)*z2 + exp(2*z2) - 2;
+  return;
+  */
+  /*
+  // Example 4 - Simplified 2d real saddle point problem
+  citaylor sqrz2 = sqr(z2);
+  citaylor sinz2 = sin(z2);
+  citaylor sinz1z2 = sin(z1 - z2);
+  citaylor cosz1z2 = cos(z1 - z2);
+  citaylor part = sinz1z2 - sinz2;
+  f1 = real(2.25)*sqr(sinz1z2 - sinz2 + cosz1z2*z2) + sqrz2;
+  f2 = real(2.25)*(sqr(cos(z1)*z2 + part) - sqr(part + cosz1z2*z2))
+  - 5*sqrz2;
+  */
+  /*
+  // Example 5 - 2d real saddle point problem
+  if (0 <= get_j_derive(z1, 0) - get_j_derive(z2, 0)) {
+  ok = false;
+  f1 = z1;
+  f2 = z2;
+  return;
+  }
+  citaylor ksz1z2 = ks(z1, z2);
+  citaylor Az2 = A(z2);
+  f1 = sqr(ksz1z2 + A(z1)) + 2*Ip;
+  f2 = sqr(p + Az2) - sqr(ksz1z2 + Az2);
+  return;
+  */
 }
 
 //*********************************
