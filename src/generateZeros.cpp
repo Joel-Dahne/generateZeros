@@ -45,20 +45,23 @@ using namespace std;
 //Calculate the jacobian
 cmatrix jacobian(cvector &domain, bool &ok, interval &parameter) {
   cmatrix J(2, 2);
+  citaylor f1, f2;
 
   citaylor z2(1, 0);
-  
+
   //Compute df1/dz1 and df2/dz1
   citaylor z1 = citaylor(1, domain[1]);
   z2 = domain[2];
-  J[1][1] = mid(get_j_derive(function1(z1, z2, ok, parameter), 1));
-  J[2][1] = mid(get_j_derive(function2(z1, z2, ok, parameter), 1));
+  function (f1, f2, z1, z2, ok, parameter);
+  J[1][1] = mid(get_j_derive(f1, 1));
+  J[2][1] = mid(get_j_derive(f2, 1));
 
   //Compute df1/dz2 and df2/dz2
   z1 = domain[1];
   z2 = citaylor(1, domain[2]);
-  J[1][2] = mid(get_j_derive(function1(z1, z2, ok, parameter), 1));
-  J[2][2] = mid(get_j_derive(function2(z1, z2, ok, parameter), 1));
+  function (f1, f2, z1, z2, ok, parameter);
+  J[1][2] = mid(get_j_derive(f1, 1));
+  J[2][2] = mid(get_j_derive(f2, 1));
 
   return J;
 }
@@ -71,7 +74,7 @@ complex det(cmatrix &M) {
 //Calculate the inverse
 cmatrix inverse(cmatrix &M, bool &ok) {
   complex determinant = det(M);
-  
+
   if (determinant == 0) {
     ok = false;
     return M;
@@ -84,14 +87,14 @@ cmatrix inverse(cmatrix &M, bool &ok) {
   inverse[2][1] = -M[2][1];
   inverse[2][2] = M[1][1];
 
-  inverse /= determinant;  
+  inverse /= determinant;
 
   return inverse;
 }
 
 //Create a random point in the domain
 cvector createRandomPoint(civector &domain) {
-  
+
   real re1 = InfRe(domain[1]) + ((float) rand() / (float) RAND_MAX)*diam(Re(domain[1]));
   real im1 = InfIm(domain[1]) + ((float) rand() / (float) RAND_MAX)*diam(Im(domain[1]));
   real re2 = InfRe(domain[2]) + ((float) rand() / (float) RAND_MAX)*diam(Re(domain[2]));
@@ -133,20 +136,23 @@ void newtonSteps(cvector &z, civector &domain, int iterations, bool &ok,
 //Calculate the jacobian
 cimatrix jacobian(const civector &domain, bool &ok, const interval &parameter) {
   cimatrix J(2, 2);
+  citaylor f1, f2;
 
   citaylor z2(1, 0);
-  
+
   //Compute df1/dz1 and df2/dz1
   citaylor z1 = citaylor(1, domain[1]);
   z2 = domain[2];
-  J[1][1] = get_j_derive(function1(z1, z2, ok, parameter), 1);
-  J[2][1] = get_j_derive(function2(z1, z2, ok, parameter), 1);
+  function(f1, f2, z1, z2, ok, parameter);
+  J[1][1] = get_j_derive(f1, 1);
+  J[2][1] = get_j_derive(f2, 1);
 
   //Compute df1/dz2 and df2/dz2
   z1 = domain[1];
   z2 = citaylor(1, domain[2]);
-  J[1][2] = get_j_derive(function1(z1, z2, ok, parameter), 1);
-  J[2][2] = get_j_derive(function2(z1, z2, ok, parameter), 1);
+  function(f1, f2, z1, z2, ok, parameter);
+  J[1][2] = get_j_derive(f1, 1);
+  J[2][2] = get_j_derive(f2, 1);
 
   return J;
 }
@@ -160,7 +166,7 @@ cinterval det(const cimatrix &M) {
 //Calculate the inverse
 cimatrix inverse(const cimatrix &M, bool &ok) {
   cinterval determinant = det(M);
-  
+
   if (0 <= determinant) {
     ok = false;
     return M;
@@ -173,7 +179,7 @@ cimatrix inverse(const cimatrix &M, bool &ok) {
   inverse[2][1] = -M[2][1];
   inverse[2][2] = M[1][1];
 
-  inverse /= determinant;  
+  inverse /= determinant;
 
   return inverse;
 }
@@ -188,7 +194,7 @@ civector Mid(civector &domain) {
   for (int i = 1; i <= 2; i++) {
     midPoint[i] = cinterval(mid(domain[i]));
   }
-  
+
   return midPoint;
 }
 
@@ -200,13 +206,13 @@ civector enclose(cvector &z, real &tol) {
                         interval(Im(z[1]) - tol/2, Im(z[1]) + tol/2));
   domain[2] = cinterval(interval(Re(z[2]) - tol/2, Re(z[2]) + tol/2),
                         interval(Im(z[2]) - tol/2, Im(z[2]) + tol/2));
-  
+
   return domain;
 }
 
 //Determine if two intervals are disjoint
 bool disjoint(interval &x1, interval &x2) {
-  return Sup(x1) < Inf(x2) || Inf(x1) > Sup(x2); 
+  return Sup(x1) < Inf(x2) || Inf(x1) > Sup(x2);
 }
 
 //Determines if to complex interval vector are disjoint
@@ -218,14 +224,14 @@ bool disjoint(civector &z1, civector &z2) {
 civector N(civector &domain, bool &ok, interval parameter) {
   civector mid = Mid(domain);
 
-  return mid - inverse(jacobian(domain, ok, parameter), ok)*function(mid, ok, parameter);  
+  return mid - inverse(jacobian(domain, ok, parameter), ok)*intervalFunction(mid, ok, parameter);
 }
 
 civector validate(cvector &z, bool &valid, real &tol,
                   interval &parameter) {
 
   bool ok(true);
-  
+
   civector domain = enclose(z, tol);
 
   civector newDomain = N(domain, ok, parameter);
@@ -251,11 +257,11 @@ civector validate(cvector &z, bool &valid, real &tol,
   }
 
   valid = false;
-  return domain;  
+  return domain;
 }
 
 bool isNewZero(civector &zero, vector<civector> &zeros) {
-  
+
   for (int i = 0; i < zeros.size(); i++) {
     if (!disjoint(zero, zeros[i])) {
       return false;
@@ -284,7 +290,7 @@ This will use verbose output, stop when 100 zeros are found and use the domain:\
 [-1, 1] + i[-2, 2] x [-3, 3] + i[-4, 4]";
 
   //Read arguments
-  
+
   //Read options
 
   //Set stop criterias
@@ -300,7 +306,7 @@ This will use verbose output, stop when 100 zeros are found and use the domain:\
   //Stop when the number of steps since last found reaches this
   int stopOnStepsLast = 0;
   int maxStepsLast = 0;
-  
+
   //Set parameter for the function
   int parameterSet = 0;
   interval parameter = interval(0);
@@ -357,30 +363,30 @@ This will use verbose output, stop when 100 zeros are found and use the domain:\
         abort ();
       }
 
-  
+
   //Read domain
   if (argc - optind < 8) {
     fprintf (stderr, "To few arguments, cannot read domain.\n\n");
     cerr << usage << endl;;
     exit(0);
   }
-  
+
   civector domain(2);
   domain[1] = cinterval(interval(atof(argv[optind]), atof(argv[optind + 1])),
                         interval(atof(argv[optind + 2]), atof(argv[optind + 3])));
   domain[2] = cinterval(interval(atof(argv[optind + 4]), atof(argv[optind + 5])),
                         interval(atof(argv[optind + 6]), atof(argv[optind + 7])));
 
-  
+
   //Start the rest of the program
-    
+
   //Set parameter for the newton methods
   int iterations = 15;
   real tol = 1e-5;
 
   //Initiate random seed
   srand(time(NULL));
-    
+
   //Set up counters
   int found = 0;
   int steps = 0;
@@ -404,7 +410,7 @@ This will use verbose output, stop when 100 zeros are found and use the domain:\
       if (stopOnStepsLast && stepsLast > maxStepsLast)
         break;
     }
-      
+
     //Create a random point
     cvector z = createRandomPoint(domain);
 

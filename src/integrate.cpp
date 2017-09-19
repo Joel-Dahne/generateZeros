@@ -55,12 +55,12 @@ const cinterval I(interval(0), interval(1)); //An enclosure of i
 cimatrix jacobian(const citaylor &D1f1, const citaylor &D2f1,
                   const citaylor &D1f2, const citaylor &D2f2) {
   cimatrix J(2, 2);
-  
+
   J[1][1] = get_j_derive(D1f1, 1);
   J[1][2] = get_j_derive(D2f1, 1);
   J[2][1] = get_j_derive(D1f2, 1);
   J[2][2] = get_j_derive(D2f2, 1);
-  
+
   return J;
 }
 
@@ -82,7 +82,7 @@ cimatrix jacobian_k(const citaylor &D1f1, const citaylor &D2f1,
     J[2][1] = get_j_derive(D1f2, 1);
     J[2][2] = get_j_derive(D2f2, 0);
   }
-    
+
   return J;
 }
 
@@ -147,7 +147,7 @@ void splitIntegrationPart(const pair<civector, int> &part,
   int side = part.second;
 
   splitDomain(part.first, D1, D2);
-  
+
   p1 = make_pair(D1, side);
   p2 = make_pair(D2, side);
 }
@@ -161,12 +161,12 @@ inline interval length2(civector &V) {
 //Takes a domain and splits it into 8 smaller domains by cutting along
 //each dimension, except the dimension given by side
 void octasect(civector &domain, int side, civector * newDomains) {
-  
+
   int index = side/4;
   for (int i = 0; i < 4; ++i) {
     newDomains[i] = domain;
   }
-  
+
   interval lowRe  = interval(InfRe(domain[2 - index]), Mid(Re(domain[2 - index])));
   interval highRe = interval(Mid(Re(domain[2 - index])), SupRe(domain[2 - index]));
   interval lowIm  = interval(InfIm(domain[2 - index]), Mid(Im(domain[2 - index])));
@@ -176,7 +176,7 @@ void octasect(civector &domain, int side, civector * newDomains) {
   newDomains[1][2 - index] = cinterval(lowRe, highIm);
   newDomains[2][2 - index] = cinterval(highRe, lowIm);
   newDomains[3][2 - index] = cinterval(highRe, highIm);
-  
+
   for (int i = 0; i < 4; ++i) {
     newDomains[i + 4] = newDomains[i];
     if (side/2 % 2 == 1) {
@@ -195,7 +195,7 @@ void octasect(civector &domain, int side, civector * newDomains) {
                      SupIm(newDomains[i + 4][index + 1])));
     }
   }
-  
+
   return;
 }
 
@@ -203,7 +203,7 @@ void octasect(civector &domain, int side, civector * newDomains) {
 //Assumes that the side corresponding to the int side
 //has diameter 0
 interval volume(const civector &V, const int &side) {
-  
+
   cvector diameters = diam(V);
   interval volume(1);
 
@@ -229,9 +229,9 @@ cinterval integrand(civector &domain, const int &side,
   if (!ok) {
     return cinterval(0);
   }
-  
+
   citaylor z1, z2, constz1(1, 0), constz2(1, 0);
-  
+
   z1 = citaylor(1, domain[1]);
   z2 = citaylor(1, domain[2]);
   constz1 = domain[1];
@@ -239,36 +239,28 @@ cinterval integrand(civector &domain, const int &side,
 
   citaylor D1f1, D2f1, D1f2, D2f2;
 
-  D1f1 = function1(z1, constz2, ok, parameter);
+  function(D1f1, D1f2, z1, constz2, ok, parameter);
   if (!ok) {
-    return cinterval(0);
+      return cinterval(0);
   }
-  D2f1 = function1(constz1, z2, ok, parameter);
+  function(D2f1, D2f2, constz1, z2, ok, parameter);
   if (!ok) {
-    return cinterval(0);
+      return cinterval(0);
   }
-  D1f2 = function2(z1, constz2, ok, parameter);
-  if (!ok) {
-    return cinterval(0);
-  }
-  D2f2 = function2(constz1, z2, ok, parameter);
-  if (!ok) {
-    return cinterval(0);
-  }
-  
+
   civector enclosure(2);
   enclosure[1] = get_j_derive(D1f1, 0);
   enclosure[2] = get_j_derive(D1f2, 0);
-    
+
   interval fLength2 = length2(enclosure);
-   
+
   if (0 <= fLength2) {
     ok = false;
     return cinterval(0);
   }
 
   cimatrix J = jacobian(D1f1, D2f1, D1f2, D2f2);
-  
+
   cimatrix J_k = jacobian_k(D1f1, D2f1, D1f2, D2f2, side);
 
   return det(J)*conj(det(J_k))/sqr(fLength2);
@@ -306,7 +298,7 @@ This will use verbose output and calculate the integral for the domain:\n\
 
   //Sides to integrate
   vector<int> sides;
-  
+
   //Verbose output
   int verbose = 0;
 
@@ -358,13 +350,13 @@ This will use verbose output and calculate the integral for the domain:\n\
     cerr << usage << endl;;
     exit(0);
   }
-  
+
   civector domain(2);
   domain[1] = cinterval(interval(atof(argv[optind]), atof(argv[optind + 1])),
                         interval(atof(argv[optind + 2]), atof(argv[optind + 3])));
   domain[2] = cinterval(interval(atof(argv[optind + 4]), atof(argv[optind + 5])),
                         interval(atof(argv[optind + 6]), atof(argv[optind + 7])));
-  
+
   //Set up the program
 
   //Create a list of the sides to integrate. Each element is a pair,
@@ -375,7 +367,7 @@ This will use verbose output and calculate the integral for the domain:\n\
       sides.push_back(i);
     }
   }
-  
+
   List<pair<civector, int> > * currentWorkList;
   currentWorkList = new List<pair<civector, int> >;
 
@@ -393,14 +385,14 @@ This will use verbose output and calculate the integral for the domain:\n\
     case 6: Im(side[2]) = interval(InfIm(side[2])); break;
     case 7: Im(side[2]) = interval(SupIm(side[2])); break;
     }
-    
+
     *currentWorkList += make_pair(side, i);
   }
 
   //For storing the result of the integral
   cinterval integral(0);
   cinterval tmpIntegral(0);
-  
+
   cinterval sideIntegral[8];
   cinterval tmpSideIntegral[8];
   for (int i = 0; i < 8; ++i) {
@@ -447,7 +439,7 @@ This will use verbose output and calculate the integral for the domain:\n\
   int progress = 0;
   int progressStep = partsLeft/100;
   int progressDone = 0;
-  
+
   //Initiate the citaylor class
   citaylor tmp;
 
@@ -474,7 +466,7 @@ This will use verbose output and calculate the integral for the domain:\n\
     //For checking if the integration succeded and satisfies the
     //tolerance
     bool partDone(false);
-    
+
 #pragma omp critical
     {
       if (omp_get_thread_num() == 0 && verbose)
@@ -492,14 +484,14 @@ This will use verbose output and calculate the integral for the domain:\n\
       }
       //Perform the step
       while(!stepDone) {
-        
+
         ok = true;
-      
+
         currentDomain = currentPart.first;
         side = currentPart.second;
 
         octasect(currentDomain, side, domainSections);
-        
+
         currentIntegral = 0;
         for (int i = 0; i < 8; ++i) {
           integrandEnclosure = integrand(domainSections[i], side, ok, parameter);
@@ -507,7 +499,7 @@ This will use verbose output and calculate the integral for the domain:\n\
           currentIntegral += integrandEnclosure*domainVolume;
         }
         currentIntegral *= coefs[side];
-        
+
         width = diam(Re(currentIntegral));
 
         partDone = width <= tol && ok;
@@ -515,7 +507,7 @@ This will use verbose output and calculate the integral for the domain:\n\
         if (!partDone) {
           splitIntegrationPart(currentPart, newPart1, newPart2);
         }
-        
+
 #pragma omp critical
         {
           ++progress;
@@ -565,7 +557,7 @@ This will use verbose output and calculate the integral for the domain:\n\
 
         //Set new tolerance
         tol = (originalTol - diam(Re(integral)))/partsLeft/1.5;
-        
+
         if (verbose) {
           cout << "Step " << step << endl;
           cout << "Parts done: " << partsDone << ", parts left: " << partsLeft << endl;
@@ -591,10 +583,10 @@ This will use verbose output and calculate the integral for the domain:\n\
           integral = tmpIntegral;
           for (int i = 0; i < 8; ++i) {
             sideIntegral[i] = tmpSideIntegral[i];
-          } 
+          }
           done = true;
         }
-        
+
         //If not done set the next work list to the current one
         if (!IsEmpty(*nextWorkList) && !done) {
           delete currentWorkList;
@@ -633,13 +625,13 @@ This will use verbose output and calculate the integral for the domain:\n\
       int j = sides[i];
       cout << "Integral side " << j << ": " << sideIntegral[j] << endl;
     }
-    
+
     cout << "Total integral: " << integral << endl;
-    
+
     cout << "Number of steps used: " << steps << endl;
   } else {
     cout << integral << endl;
   }
-  
+
   return 0;
 }

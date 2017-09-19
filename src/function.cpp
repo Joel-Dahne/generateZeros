@@ -73,113 +73,58 @@ citaylor ks(citaylor &z1, citaylor &z2) {
 }
 //End of stuff used in example 3
 
-//Function 1
-citaylor function1(citaylor &z1, citaylor &z2, bool &ok,
-                   interval p) {
-  
-  //Example 1 - the identity function on C^2
-  return z1;
-  
-  /*
-  //Example 2 - The function f(z1, z2) = (sin(z1) + (z1)^2 +
-  //e^{z2} - cos(2(z2)), cos(z1) + (z2)^3 + e^{2(z2)} - 2)
-  return sin(z1) + sqr(z1) + exp(z2) - cos(2*z2);
-  */
-  /*
-  //Example 2 - Hard coded derivative
-  cinterval z1i = get_j_coef(z1, 0);
-  cinterval z2i = get_j_coef(z2, 0);
-  if (get_order(z1) == 0) {
-    return citaylor(0, sin(z1i) + sqr(z1i) + exp(z2i) - cos(2*z2i));
-  } else {
-    if (get_j_coef(z1, 1) == cinterval(1)) {
-      civector z(0, 1);
-      z[0] = sin(z1i) + sqr(z1i) + exp(z2i) - cos(2*z2i);
-      z[1] = cos(z1i) + 2*z1i;
-      return citaylor(z);
-    } else if (get_j_coef(z2, 1) == cinterval(1)) {
-      civector z(0, 1);
-      z[0] = sin(z1i) + sqr(z1i) + exp(z2i) - cos(2*z2i);
-      z[1] = exp(z2i) + 2*sin(2*z2i);
-      return citaylor(z);
-    }
-  }
-  */
-  /*
-  //Example 3 - 2d real saddle point problem
-  //First check that the function is well defined on the domain
-  if (0 <= get_j_derive(z1, 0) - get_j_derive(z2, 0)) {
-    ok = false;
-    return z1;
-  }
-  //Evaluate the function
-  return sqr(ks(z1, z2) + A(z1)) + 2*Ip;
-  */
-  /*
-  //Example 4 - Simplified version of example 3
-  return real(2.25)*sqr(sin(z1-z2) - sin(z2) + cos(z1-z2)*z2) + sqr(z2);
-  */
-  /*
-  //Example 5 - A polynomial function
-  return 4e-5*sqr(sqr(z1))*z1*sqr(z2)+2e-3*z1*sqr(sqr(z2))+2*sqr(z1)*z2-z2+real(0.75);
-  */
-}
+// Function
+void function(citaylor &f1, citaylor &f2, citaylor &z1, citaylor &z2, bool &ok,
+              interval p) {
 
-//Function 2
-citaylor function2(citaylor &z1, citaylor &z2, bool &ok,
-                   interval p) {
-  
-  //Example 1 - the identity function on C^2
-  return z2;
-  
-  /*
-  //Example 2 - The function f(z1, z2) = (sin(z1) + (z1)^2 +
-  //e^{z2} - cos(2(z2)), cos(z1) + (z2)^3 + e^{2(z2)} - 2)
-  return cos(z1) + sqr(z2)*z2 + exp(2*z2) - 2;
-  */
-  /*
-  //Example 2 - Hard coded derivative
-  cinterval z1i = get_j_coef(z1, 0);
-  cinterval z2i = get_j_coef(z2, 0);
-  if (get_order(z2) == 0) {
-    return citaylor(0, cos(z1i) + sqr(z2i)*z2i + exp(2*z2i) - 2);
-  } else {
-    if (get_j_coef(z1, 1) == cinterval(1)) {
-      civector z(0, 1);
-      z[0] = cos(z1i) + sqr(z2i)*z2i + exp(2*z2i) - 2;
-      z[1] = -sin(z1i);
-      return citaylor(z);
-    } else if (get_j_coef(z2, 1) == cinterval(1)) {
-      civector z(0, 1);
-      z[0] = cos(z1i) + sqr(z2i)*z2i + exp(2*z2i) - 2;
-      z[1] = real(3)*sqr(z2i) + real(2)*exp(2*z2i);
-      return citaylor(z);
-    }
-  }
-  */
-  /*
-  //Example 3 - 2d real saddle point problem
-  //First check that the function is well defined on the domain
-  if (0 <= get_j_derive(z1, 0) - get_j_derive(z2, 0)) {
-    ok = false;
-    return z2;
-  }
-  //Evaluate the function
-  citaylor Az2 = A(z2);
-  return sqr(p + Az2) - sqr(ks(z1, z2) + Az2);
-  */
-  /*
-  //Example 4 - Simplified version of example 3
-  citaylor part = sin(z1 - z2) - sin(z2);
-  return real(2.25)*(sqr(cos(z1)*z2 + part) -
-                     sqr(part + cos(z1-z2)*z2)) - 5*sqr(z2);
-  */
-  /*
-  //Example 5 - A polynomial function
-  return 3e-4*z1*sqr(sqr(z2))-7e-6*z1*sqr(z1)+2*z1*sqr(z2)-z1+real(0.75);
-  */
-}
+    // Example 1 - The identity function on C^2
+    f1 = z1;
+    f2 = z2;
+    return;
 
+    /*
+    // Example 2 - A polynomial function
+    citaylor sqrz1 = sqr(z1);
+    citaylor sqrz2 = sqr(z2);
+    citaylor quadz2 = sqr(sqrz2);
+    f1 = 4e-5*sqr(sqrz1)*z1*sqr(z2) + 2e-3*z1*quadz2 +
+        2*sqrz1*z2 - z2 + real(0.75);
+    f2 = 3e-4*z1*quadz2 - 7e-6*z1*sqrz1 + 2*z1*sqrz2 - z1 + real(0.75);
+    return;
+    */
+    /*
+    // Example 3 - The function f(z1, z2) = (sin(z1) + (z1)^2 +
+    // e^{z2} - cos(2(z2)), cos(z1) + (z2)^3 + e^{2(z2)} - 2)
+    f1 = sin(z1) + sqr(z1) + exp(z2) - cos(2*z2);
+    f2 = cos(z1) + sqr(z2)*z2 + exp(2*z2) - 2;
+    return;
+    */
+    /*
+    // Example 4 - Simplified 2d real saddle point problem
+    citaylor sqrz2 = sqr(z2);
+    citaylor sinz2 = sin(z2);
+    citaylor sinz1z2 = sin(z1 - z2);
+    citaylor cosz1z2 = cos(z1 - z2);
+    citaylor part = sinz1z2 - sinz2;
+    f1 = real(2.25)*sqr(sinz1z2 - sinz2 + cosz1z2*z2) + sqrz2;
+    f2 = real(2.25)*(sqr(cos(z1)*z2 + part) - sqr(part + cosz1z2*z2))
+        - 5*sqrz2;
+    */
+    /*
+    // Example 5 - 2d real saddle point problem
+    if (0 <= get_j_derive(z1, 0) - get_j_derive(z2, 0)) {
+        ok = false;
+        f1 = z1;
+        f2 = z2;
+        return;
+    }
+    citaylor ksz1z2 = ks(z1, z2);
+    citaylor Az2 = A(z2);
+    f1 = sqr(ksz1z2 + A(z1)) + 2*Ip;
+    f2 = sqr(p + Az2) - sqr(ksz1z2 + Az2);
+    return;
+    */
+}
 
 //*********************************
 //These functions are used to make calling the above functions in
@@ -187,16 +132,18 @@ citaylor function2(citaylor &z1, citaylor &z2, bool &ok,
 //*********************************
 
 //Get an interval enclosure of the function on the domain
-civector function(civector &domain, bool &ok,
-                  interval p) {
+civector intervalFunction(civector &domain, bool &ok,
+                          interval p) {
   civector f(2);
 
   citaylor z1(0, 0), z2(0, 0);
+  citaylor f1, f2;
   z1 = domain[1];
   z2 = domain[2];
-  f[1] = get_j_derive(function1(z1, z2, ok, p), 0);
-  f[2] = get_j_derive(function2(z1, z2, ok, p), 0);
-  
+  function(f1, f2, z1, z2, ok, p);
+  f[1] = get_j_derive(f1, 0);
+  f[2] = get_j_derive(f2, 0);
+
   return f;
 }
 
@@ -206,10 +153,12 @@ cvector midFunction(cvector &z, bool &ok,
   cvector f(2);
 
   citaylor z1(0, 0), z2(0, 0);
+  citaylor f1, f2;
   z1 = z[1];
   z2 = z[2];
-  f[1] = mid(get_j_derive(function1(z1, z2, ok, p), 0));
-  f[2] = mid(get_j_derive(function2(z1, z2, ok, p), 0));
+  function(f1, f2, z1, z2, ok, p);
+  f[1] = mid(get_j_derive(f1, 0));
+  f[2] = mid(get_j_derive(f2, 0));
 
   return f;
 }

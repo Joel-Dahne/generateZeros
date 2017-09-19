@@ -29,6 +29,8 @@
 
 using namespace cxsc;
 using namespace taylor;
+void function(citaylor &f1, citaylor &f2, citaylor &z1, citaylor &z2,
+                  bool &ok, interval p);
 
 citaylor function1(citaylor &z1, citaylor &z2, bool &ok,
                    interval p);
@@ -36,7 +38,7 @@ citaylor function1(citaylor &z1, citaylor &z2, bool &ok,
 citaylor function2(citaylor &z1, citaylor &z2, bool &ok,
                    interval p);
 
-civector function(civector &domain, bool &ok,
+civector intervalFunction(civector &domain, bool &ok,
                   interval p);
 
 cvector midFunction(cvector &z, bool &ok,

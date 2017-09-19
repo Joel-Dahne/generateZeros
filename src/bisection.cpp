@@ -54,23 +54,26 @@ const cinterval I(interval(0), interval(1)); //An enclosure of i
 
 //Calculate the jacobian
 cimatrix jacobian(const civector &domain, bool &ok, const interval &parameter) {
-  cimatrix J(2, 2);
+    cimatrix J(2, 2);
+    citaylor f1, f2;
 
-  citaylor z2(1, 0);
-  
-  //Compute df1/dz1 and df2/dz1
-  citaylor z1 = citaylor(1, domain[1]);
-  z2 = domain[2];
-  J[1][1] = get_j_derive(function1(z1, z2, ok, parameter), 1);
-  J[2][1] = get_j_derive(function2(z1, z2, ok, parameter), 1);
+    citaylor z2(1, 0);
 
-  //Compute df1/dz2 and df2/dz2
-  z1 = domain[1];
-  z2 = citaylor(1, domain[2]);
-  J[1][2] = get_j_derive(function1(z1, z2, ok, parameter), 1);
-  J[2][2] = get_j_derive(function2(z1, z2, ok, parameter), 1);
+    //Compute df1/dz1 and df2/dz1
+    citaylor z1 = citaylor(1, domain[1]);
+    z2 = domain[2];
+    function(f1, f2, z1, z2, ok, parameter);
+    J[1][1] = get_j_derive(f1, 1);
+    J[2][1] = get_j_derive(f2, 1);
 
-  return J;
+    //Compute df1/dz2 and df2/dz2
+    z1 = domain[1];
+    z2 = citaylor(1, domain[2]);
+    function(f1, f2, z1, z2, ok, parameter);
+    J[1][2] = get_j_derive(f1, 1);
+    J[2][2] = get_j_derive(f2, 1);
+
+    return J;
 }
 
 //Computes the determinant of a 2x2 matrix
@@ -94,7 +97,7 @@ cimatrix inverse(const cimatrix &M, bool &ok) {
   inverse[2][1] = -M[2][1];
   inverse[2][2] = M[1][1];
 
-  inverse /= determinant;  
+  inverse /= determinant;
 
   return inverse;
 }
@@ -145,7 +148,7 @@ void splitDomain(const civector &domain, civector &D1, civector &D2) {
 
 //Determine if two intervals are disjoint
 bool disjoint(interval &x1, interval &x2) {
-  return Sup(x1) < Inf(x2) || Inf(x1) > Sup(x2); 
+  return Sup(x1) < Inf(x2) || Inf(x1) > Sup(x2);
 }
 
 //Determines if to complex interval vector are disjoint
@@ -161,7 +164,7 @@ civector Mid(civector &domain) {
   for (int i = 1; i <= 2; i++) {
     midPoint[i] = cinterval(mid(domain[i]));
   }
-  
+
   return midPoint;
 }
 
@@ -172,12 +175,14 @@ civector Mid(civector &domain) {
 //Check if the enclosure of the function on the domain contains a zero
 bool zeroInDomain(civector &domain, bool &ok, interval parameter) {
   citaylor z1, z2;
+  citaylor tf1, tf2;
   cinterval f1, f2;
 
   z1 = citaylor(0, domain[1]);
   z2 = citaylor(0, domain[2]);
-  f1 = get_j_coef(function1(z1, z2, ok, parameter), 0);
-  f2 = get_j_coef(function2(z1, z2, ok, parameter), 0);
+  function(tf1, tf2, z1, z2, ok, parameter);
+  f1 = get_j_coef(tf1, 0);
+  f2 = get_j_coef(tf2, 0);
 
   return (0<=f1 && 0<=f2 && ok);
 }
@@ -186,7 +191,7 @@ bool zeroInDomain(civector &domain, bool &ok, interval parameter) {
 civector N(civector &domain, bool &ok, interval parameter) {
   civector mid = Mid(domain);
 
-  return mid - inverse(jacobian(domain, ok, parameter), ok)*function(mid, ok, parameter);  
+  return mid - inverse(jacobian(domain, ok, parameter), ok)*intervalFunction(mid, ok, parameter);
 }
 
 civector validate(civector &domain, bool &isZero, bool &ok, interval &parameter) {
@@ -198,7 +203,7 @@ civector validate(civector &domain, bool &isZero, bool &ok, interval &parameter)
 
   for (int i = 0; i < 10; i++) {
     newDomain = N(domain, succCalc, parameter);
-    
+
     if (!succCalc) {
       //Failed calculations
       return domain;
@@ -211,11 +216,11 @@ civector validate(civector &domain, bool &isZero, bool &ok, interval &parameter)
       ok = true;
       return domain;
     }
-    
+
     domain = newDomain & domain;
   }
 
-  return domain;  
+  return domain;
 }
 
 int main(int argc, char * argv[]) {
@@ -225,7 +230,7 @@ Find all zeros in a domain by using a combination of bisection\n\
 and the Newton interval method\n\n\
 Options are:\n\
   -p <value> set the parameter for the function to this\n\
-  -v verbose - print more information\n                               \
+  -v verbose - print more information\n\
 Domain should be given after the options as:\n\
 inf(real1) sup(real1) inf(im1) sup(im1) inf(real2) sup(real2) inf(im2) sup(im2)\n\n\
 Example: ./bisection -v -- -1 1 -2 2 -3 3 -4 4\n\
@@ -274,7 +279,7 @@ This will use verbose output and find all zeros in the domain:\n\
     cerr << usage << endl;;
     exit(0);
   }
-  
+
   civector domain(2);
   domain[1] = cinterval(interval(atof(argv[optind]), atof(argv[optind + 1])),
                         interval(atof(argv[optind + 2]), atof(argv[optind + 3])));
@@ -334,13 +339,13 @@ This will use verbose output and find all zeros in the domain:\n\
         partFailed = false;
         partDiscardedEnclosure = false;
         partDiscardedNewton = false;
-      
+
         if (zeroInDomain(currentDomain, ok, parameter)) {
           jac = jacobian(currentDomain, ok, parameter);
 
           if ((!(0 <= det(jac))) && ok) {
             zero = validate(currentDomain, isZero, ok, parameter);
-          
+
             if (isZero && ok) {
               partDone = true;
               cout << "Zero: " << zero << endl;
@@ -373,8 +378,8 @@ This will use verbose output and find all zeros in the domain:\n\
           if (isZero) {
             zerosFound+=1;
           }
-        
-        
+
+
           if (!partDone) {
             *nextWorkList+=newDomain1;
             *nextWorkList+=newDomain2;
@@ -382,7 +387,7 @@ This will use verbose output and find all zeros in the domain:\n\
           } else {
             partsDone+=1;
           }
-        
+
           if (!IsEmpty(*currentWorkList)) {
             currentDomain = Pop(*currentWorkList);
           } else {
@@ -401,7 +406,7 @@ This will use verbose output and find all zeros in the domain:\n\
           cout << "Parts discarded from Newton " << partsDiscardedNewton << endl;
           cout << "Parts failed " << partsFailed << endl;
         }
-    
+
         //If not done set the next work list to the current one
         if (!IsEmpty(*nextWorkList) && !done) {
           delete currentWorkList;
@@ -418,6 +423,10 @@ This will use verbose output and find all zeros in the domain:\n\
         partsFailed = 0;
         partsDiscardedEnclosure = 0;
         partsDiscardedNewton = 0;
+
+        // DEBUG - Print remaining sections
+        // cout << *currentWorkList << endl;
+
       }
     }
   }
