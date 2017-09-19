@@ -229,7 +229,8 @@ int main(int argc, char * argv[]) {
 Find all zeros in a domain by using a combination of bisection\n\
 and the Newton interval method\n\n\
 Options are:\n\
-  -p <value> set the parameter for the function to this\n\
+  -s <value> - stop after this many steps\n\
+  -p <value> - set the parameter for the function to this\n\
   -v verbose - print more information\n\
 Domain should be given after the options as:\n\
 inf(real1) sup(real1) inf(im1) sup(im1) inf(real2) sup(real2) inf(im2) sup(im2)\n\n\
@@ -243,6 +244,9 @@ This will use verbose output and find all zeros in the domain:\n\
   int parameterSet = 0;
   interval parameter = interval(0);
 
+  //Max number of steps
+  int maxSteps = -1;
+
   //Verbose output
   int verbose = 0;
 
@@ -250,12 +254,15 @@ This will use verbose output and find all zeros in the domain:\n\
   opterr = 0;
   int c;
 
-  while ((c = getopt (argc, argv, "p:v")) != -1)
+  while ((c = getopt (argc, argv, "p:s:v")) != -1)
     switch (c)
     {
     case 'p':
       parameterSet = 1;
       parameter = interval(atof(optarg));
+      break;
+    case 's':
+      maxSteps = atoi(optarg);
       break;
     case 'v':
       verbose = 1;
@@ -352,11 +359,15 @@ This will use verbose output and find all zeros in the domain:\n\
             } else if (!isZero && ok) {
               partDiscardedNewton = true;
               partDone = true;
+            } else {
+              partsFailed = true;
             }
           }
-        } else {
+        } else if (ok) {
           partDone = true;
           partDiscardedEnclosure = true;
+        } else {
+          partsFailed = true;
         }
 
         if (!partDone) {
@@ -407,29 +418,38 @@ This will use verbose output and find all zeros in the domain:\n\
           cout << "Parts failed " << partsFailed << endl;
         }
 
-        //If not done set the next work list to the current one
-        if (!IsEmpty(*nextWorkList) && !done) {
-          delete currentWorkList;
-          currentWorkList = nextWorkList;
-          nextWorkList = new List<civector>;
-        } else {
+        if (step == maxSteps) {
+          //Stop if the maximum number of steps have been reach
+          done = true;
+        } else if (IsEmpty(*nextWorkList)) {
           done = true;
         }
 
-        // Reset and update counter
-        step+=1;
-        partsDone = 0;
-        partsLeft = 0;
-        partsFailed = 0;
-        partsDiscardedEnclosure = 0;
-        partsDiscardedNewton = 0;
+        if (!done) {
+          delete currentWorkList;
+          currentWorkList = nextWorkList;
+          nextWorkList = new List<civector>;
 
-        // DEBUG - Print remaining sections
-        // cout << *currentWorkList << endl;
+          // Reset and update counter
+          step+=1;
+          partsDone = 0;
+          partsLeft = 0;
+          partsFailed = 0;
+          partsDiscardedEnclosure = 0;
+          partsDiscardedNewton = 0;
 
+          // DEBUG - Print remaining sections
+          // cout << *currentWorkList << endl;
+        }
       }
     }
   }
+
+  if (!IsEmpty(*nextWorkList)) {
+    cout << endl << "Maximum number of steps reached" << endl;
+    cout << "Parts left: " << partsLeft << endl;
+    cout << "Percentage of original domain: " << partsLeft*pow(2.0, -maxSteps - 1) << endl;
+    }
 
   cout << "Zeros found: " << zerosFound << endl;
   return 0;
