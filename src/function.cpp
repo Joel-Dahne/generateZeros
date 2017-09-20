@@ -104,10 +104,10 @@ void function(citaylor &f1, citaylor &f2, citaylor &z1, citaylor &z2, bool &ok,
   citaylor sqrz2 = sqr(z2);
   citaylor sinz2 = sin(z2);
   citaylor sinz1z2 = sin(z1 - z2);
-  citaylor cosz1z2 = cos(z1 - z2);
+  citaylor z2cosz1z2 = z2*cos(z1 - z2);
   citaylor part = sinz1z2 - sinz2;
-  f1 = real(2.25)*sqr(sinz1z2 - sinz2 + cosz1z2*z2) + sqrz2;
-  f2 = real(2.25)*(sqr(cos(z1)*z2 + part) - sqr(part + cosz1z2*z2))
+  f1 = real(2.25)*sqr(sinz1z2 - sinz2 + z2cosz1z2*z2) + sqrz2;
+  f2 = real(2.25)*(sqr(cos(z1)*z2 + part) - sqr(part + z2cosz1z2*z2))
   - 5*sqrz2;
   */
   /*
