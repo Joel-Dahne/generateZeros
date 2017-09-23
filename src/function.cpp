@@ -68,7 +68,94 @@ citaylor alpha(citaylor &z) {
   return alpha0*sin(w0*z + phi) + alpha1*sin(w1*z + phi) + alpha2*sin(w2*z + phi);
 }
 
-citaylor ks(citaylor &z1, citaylor &z2) {
+citaylor ks(citaylor &z1, citaylor &z2, bool &ok) {
+  if (0 <= get_j_derive(z1, 0) - get_j_derive(z2, 0)) {
+    ok = false;
+    return z1;
+  }
+  citaylor zm = z1-z2;
+  citaylor zp = z1+z2;
+  citaylor part1 = 2*alpha0*cos(w0/2*zp + phi);
+  citaylor part2 = 2*alpha1*cos(w1/2*zp + phi);
+  citaylor part3 = 2*alpha2*cos(w2/2*zp + phi);
+
+  if (0 <= get_j_coef(zm, 0)) {
+    if (get_order(z1) == 0) {
+      cinterval zm0 = get_j_coef(zm, 0);
+      cinterval z;
+      cinterval tmp1e, tmp2e, tmp3e;
+      z = InfRe(zm0) + I*Im(zm0);
+      tmp1e = sin(w0/2*z)/z;
+      tmp2e = sin(w1/2*z)/z;
+      tmp3e = sin(w2/2*z)/z;
+      z = SupRe(zm0) + I*Im(zm0);
+      tmp1e = tmp1e | sin(w0/2*z)/z;
+      tmp2e = tmp2e | sin(w1/2*z)/z;
+      tmp3e = tmp3e | sin(w2/2*z)/z;
+      z = Re(zm0) + I*InfIm(zm0);
+      tmp1e = tmp1e | sin(w0/2*z)/z;
+      tmp2e = tmp2e | sin(w1/2*z)/z;
+      tmp3e = tmp3e | sin(w2/2*z)/z;
+      z = Re(zm0) + I*SupIm(zm0);
+      tmp1e = tmp1e | sin(w0/2*z)/z;
+      tmp2e = tmp2e | sin(w1/2*z)/z;
+      tmp3e = tmp3e | sin(w2/2*z)/z;
+      citaylor tmp1 = citaylor(0, tmp1e);
+      citaylor tmp2 = citaylor(0, tmp2e);
+      citaylor tmp3 = citaylor(0, tmp3e);
+      part1 = part1*tmp1;
+      part2 = part2*tmp2;
+      part3 = part3*tmp3;
+    } else {
+      cinterval zm0 = get_j_coef(zm, 0);
+      cinterval z;
+      civector tmp1e(0, 1), tmp2e(0, 1), tmp3e(0, 1);
+      z = InfRe(zm0) + I*Im(zm0);
+      tmp1e[0] = sin(w0/2*z)/z;
+      tmp2e[0] = sin(w1/2*z)/z;
+      tmp3e[0] = sin(w2/2*z)/z;
+      tmp1e[1] = w0/2*cos(w0/2*z)/z - sin(w0/2*z)/sqr(z);
+      tmp2e[1] = w1/2*cos(w1/2*z)/z - sin(w1/2*z)/sqr(z);
+      tmp3e[1] = w2/2*cos(w2/2*z)/z - sin(w2/2*z)/sqr(z);
+      z = SupRe(zm0) + I*Im(zm0);
+      tmp1e[0] = tmp1e[0] | sin(w0/2*z)/z;
+      tmp2e[0] = tmp2e[0] | sin(w1/2*z)/z;
+      tmp3e[0] = tmp3e[0] | sin(w2/2*z)/z;
+      tmp1e[1] = tmp1e[1] | w0/2*cos(w0/2*z)/z - sin(w0/2*z)/sqr(z);
+      tmp2e[1] = tmp2e[1] | w1/2*cos(w1/2*z)/z - sin(w1/2*z)/sqr(z);
+      tmp3e[1] = tmp3e[1] | w2/2*cos(w2/2*z)/z - sin(w2/2*z)/sqr(z);
+      z = Re(zm0) + I*InfIm(zm0);
+      tmp1e[0] = tmp1e[0] | sin(w0/2*z)/z;
+      tmp2e[0] = tmp2e[0] | sin(w1/2*z)/z;
+      tmp3e[0] = tmp3e[0] | sin(w2/2*z)/z;
+      tmp1e[1] = tmp1e[1] | w0/2*cos(w0/2*z)/z - sin(w0/2*z)/sqr(z);
+      tmp2e[1] = tmp2e[1] | w1/2*cos(w1/2*z)/z - sin(w1/2*z)/sqr(z);
+      tmp3e[1] = tmp3e[1] | w2/2*cos(w2/2*z)/z - sin(w2/2*z)/sqr(z);
+      z = Re(zm0) + I*SupIm(zm0);
+      tmp1e[0] = tmp1e[0] | sin(w0/2*z)/z;
+      tmp2e[0] = tmp2e[0] | sin(w1/2*z)/z;
+      tmp3e[0] = tmp3e[0] | sin(w2/2*z)/z;
+      tmp1e[1] = tmp1e[1] | w0/2*cos(w0/2*z)/z - sin(w0/2*z)/sqr(z);
+      tmp2e[1] = tmp2e[1] | w1/2*cos(w1/2*z)/z - sin(w1/2*z)/sqr(z);
+      tmp3e[1] = tmp3e[1] | w2/2*cos(w2/2*z)/z - sin(w2/2*z)/sqr(z);
+
+      tmp1e[1] = tmp1e[1]*get_j_coef(zm, 1);
+      tmp2e[1] = tmp2e[1]*get_j_coef(zm, 1);
+      tmp3e[1] = tmp3e[1]*get_j_coef(zm, 1);
+
+      citaylor tmp1 = citaylor(tmp1e);
+      citaylor tmp2 = citaylor(tmp2e);
+      citaylor tmp3 = citaylor(tmp3e);
+      part1 = part1*tmp1;
+      part2 = part2*tmp2;
+      part3 = part3*tmp3;
+    }
+  } else {
+    part1 = part1*sin(w0/2*zm)/zm;
+    part2 = part2*sin(w1/2*zm)/zm;
+    part3 = part3*sin(w2/2*zm)/zm;
+  }
+  return -(part1 + part2 + part3);
   return -(alpha(z2) - alpha(z1))/(z2 - z1);
 }
 //End of stuff used in example 3
@@ -112,13 +199,7 @@ void function(citaylor &f1, citaylor &f2, citaylor &z1, citaylor &z2, bool &ok,
   */
   /*
   // Example 5 - 2d real saddle point problem
-  if (0 <= get_j_derive(z1, 0) - get_j_derive(z2, 0)) {
-  ok = false;
-  f1 = z1;
-  f2 = z2;
-  return;
-  }
-  citaylor ksz1z2 = ks(z1, z2);
+  citaylor ksz1z2 = ks(z1, z2, ok);
   citaylor Az2 = A(z2);
   f1 = sqr(ksz1z2 + A(z1)) + 2*Ip;
   f2 = sqr(p + Az2) - sqr(ksz1z2 + Az2);
