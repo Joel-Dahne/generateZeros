@@ -163,12 +163,12 @@ citaylor ks(citaylor &z1, citaylor &z2, bool &ok) {
 // Function
 void function(citaylor &f1, citaylor &f2, citaylor &z1, citaylor &z2, bool &ok,
               interval p) {
-
+  /*
   // Example 1 - The identity function on C^2
   f1 = z1;
   f2 = z2;
   return;
-
+  */
   /*
   // Example 2 - A polynomial function
   citaylor sqrz1 = sqr(z1);
@@ -205,6 +205,17 @@ void function(citaylor &f1, citaylor &f2, citaylor &z1, citaylor &z2, bool &ok,
   f2 = sqr(p + Az2) - sqr(ksz1z2 + Az2);
   return;
   */
+
+  // Example 6 - The function f(z1, z2) = (z1^50 + z1^12 + -
+  // sin(20z1)cos(12z1) - 1, z2)
+  citaylor z1_2 = sqr(z1);
+  citaylor z1_4 = sqr(z1_2);
+  citaylor z1_8 = sqr(z1_4);
+  citaylor z1_16 = sqr(z1_8);
+  citaylor z1_32 = sqr(z1_16);
+  f1 = z1_32*z1_16*z1_2 + z1_8*z1_4 - 5*sin(20*z1)*cos(12*z1) - 1;
+  f2 = z2;
+
 }
 
 //*********************************
