@@ -60,6 +60,185 @@ const interval alpha2 = A2/w2;
 
 const interval Ip = interval(0.5145);
 
+// For example 6
+citaylor A_simple(citaylor &z) {
+  return A0*cos(z);
+}
+
+citaylor ks_simple_func(citaylor &z1, citaylor &z2) {
+  return A0*(sin(z2) - sin(z1))/(z2 - z1);
+}
+
+civector ks_simple_i(cinterval z1i, cinterval z2i, int order) {
+  citaylor z1 = citaylor(order, z1i);
+  citaylor z2 = citaylor(order, z2i);
+  return get_all_coef(A0*(sin(z2) - sin(z1))/(z2 - z1));
+}
+
+civector map_union(civector v1, civector v2) {
+  for (int i = Lb(v1); i <= Ub(v1); i++) {
+    v1[i] = v1[i] | v2[i];
+  }
+  return v1;
+}
+
+citaylor ks_simple(citaylor &z1, citaylor &z2) {
+  citaylor z_diff = z2 - z1;
+  if (0 <= get_j_coef(z_diff, 0)) {
+    cinterval z1i = get_j_coef(z1, 0);
+    cinterval z2i = get_j_coef(z2, 0);
+    int order = get_order(z1);
+    real epsilon = min(0.25, max(max(diam(Re(z1i)), diam(Im(z1i))),
+                                 max(diam(Re(z2i)), diam(Im(z2i)))));
+
+    cinterval square = z1i & z2i;
+    civector result;
+
+    // Handle the part inside of the square
+
+    // Handle the line
+    complex p = complex(InfRe(square), InfIm(square));
+    cinterval eps_square = cinterval(interval(-epsilon, epsilon),
+                                     interval(-epsilon, epsilon));
+
+    // Initiate the result to something - CXSC cannot handle empty
+    // intervals.
+    result = get_all_coef(cos(citaylor(order, p + eps_square)));
+
+    // To get an enclosure of the function on a small square centered
+    // over the plane z1=z2 we use the following method. If the square
+    // is centered at p and P is the hypercube obtained by moving
+    // epsilon in every direction: NOT ACCURATE (BUT SOME
+    // APPROXIMATION) A0 * cos(P) and derivative A0*sin(P)
+    while ((Re(p) <= SupRe(square))) {
+      while ((Im(p) <= SupIm(square))) {
+        result = map_union(result,
+                           get_all_coef(cos(citaylor(order, p + eps_square))));
+
+        p = p + complex(0, epsilon);
+      }
+
+      p = SetIm(p, InfIm(square));
+      p = p + complex(epsilon, 0);
+    }
+
+    // Handle the part in the square not on the line
+    p = complex(InfRe(square), InfIm(square));
+    cinterval z1_tmp, z2_tmp;
+    while ((Re(p) < SupRe(square)) && (Im(p) < SupIm(square))) {
+      // Up for real
+      z1_tmp = cinterval(interval(Re(p) - epsilon, Re(p)),
+                         Im(square));
+      z2_tmp = cinterval(interval(min(Re(p) + epsilon, SupRe(square)),
+                                  SupRe(square)),
+                         Im(square));
+      result = map_union(result, ks_simple_i(z1_tmp, z2_tmp, order));
+
+      // Left for real
+      z1_tmp = cinterval(interval(min(Re(p) + epsilon, SupRe(square)),
+                                  SupRe(square)),
+                         Im(square));
+      z2_tmp = cinterval(interval(Re(p) - epsilon, Re(p)),
+                         Im(square));
+      result = map_union(result, ks_simple_i(z1_tmp, z2_tmp, order));
+
+      // Up for imaginary
+      z1_tmp = cinterval(Re(square),
+                         interval(Im(p) - epsilon, Im(p)));
+      z2_tmp = cinterval(Re(square),
+                         interval(min(Im(p) + epsilon, SupIm(square)),
+                                  SupIm(square)));
+      result = map_union(result, ks_simple_i(z1_tmp, z2_tmp, order));
+
+      // Left for imaginary
+      z1_tmp = cinterval(Re(square),
+                         interval(min(Im(p) + epsilon, SupIm(square)),
+                                  SupIm(square)));
+      z2_tmp = cinterval(Re(square),
+                         interval(Im(p) - epsilon, Im(p)));
+      result = map_union(result, ks_simple_i(z1_tmp, z2_tmp, order));
+
+      p = p + complex(epsilon, epsilon);
+    }
+
+    //cout << "Result after rest in square: " << result << endl;
+
+    // Handle the part outside of the square
+    interval real1bl, real1tr, real2bl, real2tr;
+    if (InfRe(z1i) < InfRe(z2i) - epsilon) {
+      real1bl = interval(InfRe(z1i), InfRe(z2i) - epsilon);
+      real2bl = Re(z2i);
+
+      result = ks_simple_i(cinterval(real1bl, Im(z1i)),
+                           cinterval(real2bl, Im(z2i)),
+                           order);
+    } else if (InfRe(z2i) < InfRe(z1i) - epsilon){
+      real1bl = Re(z1i);
+      real2bl = interval(InfRe(z2i), InfRe(z1i) - epsilon);
+
+      result = ks_simple_i(cinterval(real1bl, Im(z1i)),
+                           cinterval(real2bl, Im(z2i)),
+                           order);
+    }
+    if (SupRe(z1i) > SupRe(z2i) + epsilon) {
+      real1tr = interval(SupRe(z2i) + epsilon, SupRe(z1i));
+      real2tr = Re(z2i);
+
+      result = map_union(result,
+                         ks_simple_i(cinterval(real1tr, Im(z1i)),
+                                     cinterval(real2tr, Im(z2i)),
+                                     order));
+    } else if (SupRe(z2i) > SupRe(z1i) + epsilon){
+      real1tr = Re(z1i);
+      real2tr = interval(SupRe(z1i) + epsilon, SupRe(z2i));
+
+      result = map_union(result,
+                         ks_simple_i(cinterval(real1tr, Im(z1i)),
+                                     cinterval(real2tr, Im(z2i)),
+                                     order));
+    }
+    interval im1bl, im1tr, im2bl, im2tr;
+    if (InfIm(z1i) < InfIm(z2i) - epsilon) {
+      im1bl = interval(InfIm(z1i), InfIm(z2i) - epsilon);
+      im2bl = Im(z2i);
+
+      result = map_union(result,
+                         ks_simple_i(cinterval(Re(z1i), im1bl),
+                                     cinterval(Re(z2i), im2bl),
+                                     order));
+    } else if (InfIm(z2i) < InfIm(z1i) - epsilon){
+      im1bl = Im(z1i);
+      im2bl = interval(InfIm(z2i), InfIm(z1i) - epsilon);
+
+      result = map_union(result,
+                         ks_simple_i(cinterval(Re(z1i), im1bl),
+                                     cinterval(Re(z2i), im2bl),
+                                     order));
+    }
+    if (SupIm(z1i) > SupIm(z2i) + epsilon) {
+      im1tr = interval(SupIm(z2i) + epsilon, SupIm(z1i));
+      im2tr = Im(z2i);
+
+      result = map_union(result,
+                         ks_simple_i(cinterval(Re(z1i), im1tr),
+                                     cinterval(Re(z2i), im2tr),
+                                     order));
+    } else if (SupIm(z2i) > SupIm(z1i) + epsilon){
+      im1tr = Im(z1i);
+      im2tr = interval(SupIm(z1i) + epsilon, SupIm(z2i));
+
+      result = map_union(result,
+                         ks_simple_i(cinterval(Re(z1i), im1tr),
+                                     cinterval(Re(z2i), im2tr),
+                                     order));
+    }
+
+    return citaylor(result);
+  } else {
+    return ks_simple_func(z1, z2);
+  }
+}
+
 citaylor A(citaylor &z) {
   return A0*cos(w0*z + phi) + A1*cos(w1*z + phi) + A2*cos(w2*z + phi);
 }
@@ -197,16 +376,35 @@ void function(citaylor &f1, citaylor &f2, citaylor &z1, citaylor &z2, bool &ok,
   f2 = real(2.25)*(sqr(cos(z1)*z2 + part) - sqr(part + z2cosz1z2*z2))
   - 5*sqrz2;
   */
+
+  // Example 6 - 2d HHG - simple saddle point problem
+  // What should Omega be?
+  real Omega = 1;
+  citaylor ksz2z1 = ks_simple(z2, z1);
+  f1 = sqr(ksz2z1 + A_simple(z1)) + 2*Ip;
+  f2 = sqr(ksz2z1 + A_simple(z2)) + 2*(Ip + Omega);
+  return;
+
   /*
-  // Example 5 - 2d real saddle point problem
+  // Example 7 - 2d ATI - simple saddle point problem
+  // What should Omega and p be?
+  real Omega = 1;
+  real p = 1;
+  citaylor ksz2z1 = ks_simple(z2, z1, ok);
+  f1 = sqr(ksz2z1 + A_simple(z1)) + 2*Ip;
+  f2 = (p + A_simple(z2)) - sqr(ksz2z1 + A_simple(z2));
+  return;
+  */
+  /*
+  // Example 8 - 2d real saddle point problem
   citaylor ksz1z2 = ks(z1, z2, ok);
   citaylor Az2 = A(z2);
   f1 = sqr(ksz1z2 + A(z1)) + 2*Ip;
   f2 = sqr(p + Az2) - sqr(ksz1z2 + Az2);
   return;
   */
-
-  // Example 6 - The function f(z1, z2) = (z1^50 + z1^12 + -
+  /*
+  // Example 9 - The function f(z1, z2) = (z1^50 + z1^12 + -
   // sin(20z1)cos(12z1) - 1, z2)
   citaylor z1_2 = sqr(z1);
   citaylor z1_4 = sqr(z1_2);
@@ -215,7 +413,7 @@ void function(citaylor &f1, citaylor &f2, citaylor &z1, citaylor &z2, bool &ok,
   citaylor z1_32 = sqr(z1_16);
   f1 = z1_32*z1_16*z1_2 + z1_8*z1_4 - 5*sin(20*z1)*cos(12*z1) - 1;
   f2 = z2;
-
+  */
 }
 
 //*********************************
