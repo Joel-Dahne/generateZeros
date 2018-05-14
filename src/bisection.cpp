@@ -250,11 +250,14 @@ This will use verbose output and find all zeros in the domain:\n\
   //Verbose output
   int verbose = 0;
 
+  //Print all intervals left
+  int printFinalIntervals = 0;
+
   //Do not print errors
   opterr = 0;
   int c;
 
-  while ((c = getopt (argc, argv, "p:s:v")) != -1)
+  while ((c = getopt (argc, argv, "p:s:vf")) != -1)
     switch (c)
     {
     case 'p':
@@ -266,6 +269,9 @@ This will use verbose output and find all zeros in the domain:\n\
       break;
     case 'v':
       verbose = 1;
+      break;
+    case 'f':
+      printFinalIntervals = 1;
       break;
     case '?':
       if (optopt == 'p')
@@ -309,6 +315,7 @@ This will use verbose output and find all zeros in the domain:\n\
   //Permanent counters
   int step = 0;
   int zerosFound = 0;
+  int bisections = 0;
 
   //Counters for each cycle
   int partsLeft = 0;
@@ -316,6 +323,7 @@ This will use verbose output and find all zeros in the domain:\n\
   int partsFailed = 0;
   int partsDiscardedEnclosure = 0;
   int partsDiscardedNewton = 0;
+
 #pragma omp parallel
   {
     //Initiate variable
@@ -355,7 +363,9 @@ This will use verbose output and find all zeros in the domain:\n\
 
             if (isZero && ok) {
               partDone = true;
-              cout << "Zero: " << zero << endl;
+              if (!printFinalIntervals) {
+                cout << "Zero: " << zero << endl;
+              }
             } else if (!isZero && ok) {
               partDiscardedNewton = true;
               partDone = true;
@@ -395,6 +405,7 @@ This will use verbose output and find all zeros in the domain:\n\
             *nextWorkList+=newDomain1;
             *nextWorkList+=newDomain2;
             partsLeft+=2;
+            bisections+=1;
           } else {
             partsDone+=1;
           }
@@ -410,7 +421,7 @@ This will use verbose output and find all zeros in the domain:\n\
 #pragma omp barrier
 #pragma omp single
       {
-        if (verbose) {
+        if (verbose && !printFinalIntervals) {
           cout << "Step " << step << endl;
           cout << "Parts done: " << partsDone << ", parts left: " << partsLeft << endl;
           cout << "Parts discarded from enclosure: " << partsDiscardedEnclosure << endl;
@@ -445,12 +456,22 @@ This will use verbose output and find all zeros in the domain:\n\
     }
   }
 
-  if (!IsEmpty(*nextWorkList)) {
-    cout << endl << "Maximum number of steps reached" << endl;
-    cout << "Parts left: " << partsLeft << endl;
-    cout << "Percentage of original domain: " << partsLeft*pow(2.0, -maxSteps - 1) << endl;
+  if (printFinalIntervals) {
+    while (!IsEmpty(*nextWorkList)) {
+      civector currentDomain = Pop(*nextWorkList);
+      cinterval z1 = currentDomain[1];
+      cinterval z2 = currentDomain[2];
+      cout << InfRe(z1) << "; " << SupRe(z1) << "; " << InfIm(z1) << "; " << SupIm(z1) << "; ";
+      cout << InfRe(z2) << "; " << SupRe(z2) << "; " << InfIm(z2) << "; " << SupIm(z2) << endl;
+    }
+  } else{
+    if (!IsEmpty(*nextWorkList)) {
+      cout << endl << "Maximum number of steps reached" << endl;
+      cout << "Parts left: " << partsLeft << endl;
+      cout << "Percentage of original domain: " << partsLeft*pow(2.0, -maxSteps - 1) << endl;
     }
 
-  cout << "Zeros found: " << zerosFound << endl;
+    cout << "Zeros found: " << zerosFound << endl;
+    cout << "Number of bisections: " << bisections << endl;}
   return 0;
 }
