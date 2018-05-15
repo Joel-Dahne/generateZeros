@@ -363,9 +363,6 @@ This will use verbose output and find all zeros in the domain:\n\
 
             if (isZero && ok) {
               partDone = true;
-              if (!printFinalIntervals) {
-                cout << "Zero: " << zero << endl;
-              }
             } else if (!isZero && ok) {
               partDiscardedNewton = true;
               partDone = true;
@@ -398,6 +395,14 @@ This will use verbose output and find all zeros in the domain:\n\
           }
           if (isZero) {
             zerosFound+=1;
+            if (!printFinalIntervals) {
+              cinterval z1 = currentDomain[1];
+              cinterval z2 = currentDomain[2];
+              cout << InfRe(z1) << "; " << SupRe(z1) << "; " << InfIm(z1)
+                   << "; " << SupIm(z1) << "; ";
+              cout << InfRe(z2) << "; " << SupRe(z2) << "; " << InfIm(z2)
+                   << "; " << SupIm(z2) << endl;
+            }
           }
 
 
