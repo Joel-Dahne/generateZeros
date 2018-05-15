@@ -365,6 +365,18 @@ void function(citaylor &f1, citaylor &f2, citaylor &z1, citaylor &z2, bool &ok,
   f2 = cos(z1) + sqr(z2)*z2 + exp(2*z2) - 2;
   return;
   */
+
+  // Example 3.5 - 1d real saddle point problem
+  const real A0 = 1;
+  const real A1 = 1;
+  const real A2 = 1;
+  const real Ip = 0.5;
+  const int np = 3;
+    f1 = sqr(p + (A0*cos(np*z1) + A1*cos((np + 1)*z1) + A2*cos((np - 1)*z1))) + 2*Ip;
+  //f1 = sqr(p + A0*cos(z1)) + 2*Ip;
+  f2 = z2;
+  return;
+
   /*
   // Example 4 - Simplified 2d real saddle point problem
   citaylor sqrz2 = sqr(z2);
