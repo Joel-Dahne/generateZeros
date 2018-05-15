@@ -231,7 +231,9 @@ and the Newton interval method\n\n\
 Options are:\n\
   -s <value> - stop after this many steps\n\
   -p <value> - set the parameter for the function to this\n\
+  -w <value> - set the width of the parameter\n\
   -v verbose - print more information\n\
+  -f - print all intervals that were not completed in the end\n\
 Domain should be given after the options as:\n\
 inf(real1) sup(real1) inf(im1) sup(im1) inf(real2) sup(real2) inf(im2) sup(im2)\n\n\
 Example: ./bisection -v -- -1 1 -2 2 -3 3 -4 4\n\
@@ -243,6 +245,8 @@ This will use verbose output and find all zeros in the domain:\n\
   //Set parameter for the function
   int parameterSet = 0;
   interval parameter = interval(0);
+  // Width of the parameter - added to the supremum
+  real width = 0;
 
   //Max number of steps
   int maxSteps = -1;
@@ -257,7 +261,7 @@ This will use verbose output and find all zeros in the domain:\n\
   opterr = 0;
   int c;
 
-  while ((c = getopt (argc, argv, "p:s:vf")) != -1)
+  while ((c = getopt (argc, argv, "p:s:w:vf")) != -1)
     switch (c)
     {
     case 'p':
@@ -266,6 +270,9 @@ This will use verbose output and find all zeros in the domain:\n\
       break;
     case 's':
       maxSteps = atoi(optarg);
+      break;
+    case 'w':
+      width = atof(optarg);
       break;
     case 'v':
       verbose = 1;
@@ -285,6 +292,8 @@ This will use verbose output and find all zeros in the domain:\n\
     default:
       abort ();
     }
+
+  parameter = interval(Inf(parameter), Sup(parameter) + width);
 
   //Read domain
   if (argc - optind < 8) {
