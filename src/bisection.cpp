@@ -194,7 +194,7 @@ civector N(civector &domain, bool &ok, interval parameter) {
   return mid - inverse(jacobian(domain, ok, parameter), ok)*intervalFunction(mid, ok, parameter);
 }
 
-civector validate(civector &domain, bool &isZero, bool &ok, interval &parameter) {
+civector validate(civector domain, bool &isZero, bool &ok, interval &parameter) {
 
   civector newDomain;
   bool succCalc = true;
