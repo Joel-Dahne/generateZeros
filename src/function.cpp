@@ -24,15 +24,8 @@
 //Private libraries
 #include "citaylor.hpp"
 
-#include <iostream>
-
 using namespace cxsc;
 using namespace taylor;
-using namespace std;
-
-const interval PI(Pi());       // An enclosure of pi.
-const interval PI2(sqr(Pi()));       // An enclosure of pi.
-const cinterval I(interval(0), interval(1)); //An enclosure of i
 
 //**********************************
 //Implementation of the function analyzed
@@ -41,30 +34,20 @@ const cinterval I(interval(0), interval(1)); //An enclosure of i
 //Used in example 3
 const interval F0 = interval(0.0534);
 const interval w = interval(0.057);
-const interval np = interval(3);
-const interval phi = PI/2;
+const interval np = interval(4);
 
 const interval wp = w/np;
 const interval w0 = w;
-const interval w1 = w + wp;
-const interval w2 = w - wp;
 
 const interval E0 = F0/2;
-const interval E1 = -E0/2;
-const interval E2 = E1;
 
 const interval A0 = E0/w0;
-const interval A1 = E1/w1;
-const interval A2 = E2/w2;
 
 const interval alpha0 = A0/w0;
-const interval alpha1 = A1/w1;
-const interval alpha2 = A2/w2;
 
 const interval Ip = interval(0.5145);
-const interval omega = interval(1);
+const interval omega = interval(2);
 
-// For example 6
 citaylor A_simple(citaylor z) {
   return A0*cos(z);
 }
@@ -74,17 +57,18 @@ citaylor ks_simple(citaylor z1, citaylor z2) {
 }
 
 citaylor A(citaylor z) {
-  return A0*cos(np*z) + A1*cos((np + 1)*z) + A2*cos((np - 1)*z);
+  citaylor f1 = -A0*(sin((np-1)*z) - 2*sin(np*z) + sin((np + 1)*z))/4;
+  citaylor f2 = A0*sqr(sin(z/2))*sin(np*z);
+  return citaylor(get_all_coef(f1) & get_all_coef(f2));
 }
 
 citaylor alpha(citaylor z) {
-  return alpha0*sin(np*z) + alpha1*sin((np + 1)*z) + alpha2*sin((np - 1)*z);
+  return A0*(cos((np-1)*z)/(np-1) - 2*cos(np*z)/np + cos((np + 1)*z)/(np + 1))/4;
 }
 
 citaylor ks(citaylor z1, citaylor z2) {
   return (alpha(z1) - alpha(z1 - z2))/z2;
 }
-//End of stuff used in example 3
 
 // Function
 void function(citaylor &f1, citaylor &f2, citaylor &z1, citaylor &z2, bool &ok,
@@ -112,41 +96,23 @@ void function(citaylor &f1, citaylor &f2, citaylor &z1, citaylor &z2, bool &ok,
   f2 = cos(z1) + sqr(z2)*z2 + exp(2*z2) - 2;
   return;
   */
+
   /*
-  // Example 3.5 - 1d real saddle point problem
-    f1 = sqr(p + (A0*cos(np*z1) + A1*cos((np + 1)*z1) + A2*cos((np - 1)*z1))) + 2*Ip;
-  //f1 = sqr(p + A0*cos(z1)) + 2*Ip;
-  f2 = z2;
-  return;
-  */
-  /*
-  // Example 4 - Simplified 2d real saddle point problem
-  citaylor sqrz2 = sqr(z2);
-  citaylor sinz2 = sin(z2);
-  citaylor sinz1z2 = sin(z1 - z2);
-  citaylor z2cosz1z2 = z2*cos(z1 - z2);
-  citaylor part = sinz1z2 - sinz2;
-  f1 = real(2.25)*sqr(sinz1z2 - sinz2 + z2cosz1z2*z2) + sqrz2;
-  f2 = real(2.25)*(sqr(cos(z1)*z2 + part) - sqr(part + z2cosz1z2*z2))
-  - 5*sqrz2;
-  return;
-  */
-  /*
-  // Example 6 - 2d HHG - simple saddle point problem
+  // Example 4a - 2d HHG - simple saddle point problem
   citaylor ksz1z2 = ks_simple(z1, z2);
   f1 = sqr(ksz1z2 + A_simple(z1)) + 2*Ip;
   f2 = sqr(ksz1z2 + A_simple(z2 + z1)) + 2*(Ip - omega);
   return;
   */
 
-  // Example 6.5 - 2d HHG - saddle point problem
+  // Example 4b - 2d HHG - saddle point problem
   citaylor ksz1z2 = ks(z1, z2);
   f1 = sqr(ksz1z2 + A(z1 - z2)) + 2*Ip;
   f2 = sqr(ksz1z2 + A(z1)) + 2*(Ip - omega);
   return;
 
   /*
-  // Example 7 - 2d ATI - simple saddle point problem
+  // Example 5a - 2d ATI - simple saddle point problem
   citaylor ksz1z2 = ks_simple(z1, z2);
   citaylor Az2z1 = A_simple(z2 + z1);
   f1 = sqr(ksz1z2 + A_simple(z1)) + 2*Ip;
@@ -154,7 +120,7 @@ void function(citaylor &f1, citaylor &f2, citaylor &z1, citaylor &z2, bool &ok,
   return;
   */
   /*
-  // Example 7 - 2d ATI - saddle point problem
+  // Example 5b - 2d ATI - saddle point problem
   citaylor ksz1z2 = ks(z1, z2);
   citaylor Az2z1 = A(z2 + z1);
   f1 = sqr(ksz1z2 + A(z1)) + 2*Ip;
@@ -162,15 +128,7 @@ void function(citaylor &f1, citaylor &f2, citaylor &z1, citaylor &z2, bool &ok,
   return;
   */
   /*
-  // Example 8 - 2d real saddle point problem
-  citaylor ksz1z2 = ks(z1, z2, ok);
-  citaylor Az2 = A(z2);
-  f1 = sqr(ksz1z2 + A(z1)) + 2*Ip;
-  f2 = sqr(p + Az2) - sqr(ksz1z2 + Az2);
-  return;
-  */
-  /*
-  // Example 9 - The function f(z1, z2) = (z1^50 + z1^12 + -
+  // Example 6 - The function f(z1, z2) = (z1^50 + z1^12 + -
   // sin(20z1)cos(12z1) - 1, z2)
   citaylor z1_2 = sqr(z1);
   citaylor z1_4 = sqr(z1_2);
@@ -180,14 +138,6 @@ void function(citaylor &f1, citaylor &f2, citaylor &z1, citaylor &z2, bool &ok,
   f1 = z1_32*z1_16*z1_2 + z1_8*z1_4 - 5*sin(20*z1)*cos(12*z1) - 1;
   f2 = z2;
   */
-
-  real Ip = 0.5;
-  real omega = 1;
-  real A0 = 1;
-  citaylor pst = A0*(cos(z1) - cos(z1 - z2))/z2;
-  f1 = pst + A0*sin(z1 - z2) + I*sqrt(2*Ip);
-  f2 = pst + A0*sin(z1) + I*sqrt(omega - 2*Ip);
-
 }
 
 //*********************************
